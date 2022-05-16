@@ -1,10 +1,10 @@
 import 'dotenv/config';
 import { Request, Response } from 'express';
-import mysql, { MysqlError } from 'mysql';
+import { MysqlError, createConnection } from 'mysql';
 import { User } from '../types';
 
 export const getUsers = async (_req: Request, res: Response): Promise<void> => {
-    const con = mysql.createConnection({
+    const con = createConnection({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
         password: process.env.DB_PASS,
@@ -24,7 +24,7 @@ export const getUsers = async (_req: Request, res: Response): Promise<void> => {
 
 export const addUser = async (req: Request, res: Response): Promise<void> => {
     const user: User = req.body;
-    const con = mysql.createConnection({
+    const con = createConnection({
         host: process.env.DB_HOST,
         user: process.env.DB_USER,
         password: process.env.DB_PASS,

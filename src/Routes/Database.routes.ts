@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getUsers, addUser } from '../Controllers/Database.controller';
+import { getUsers, addUser } from '../Controllers/Postgres.controller';
 
 const databaseRouter = Router();
 
