@@ -2,7 +2,7 @@ import SpotifyWebApi from 'spotify-web-api-node';
 import 'dotenv/config';
 import { Request, Response } from 'express';
 
-const spotifyApi: SpotifyWebApi = new SpotifyWebApi({
+const spotifyApi: any = new SpotifyWebApi({
     clientId: process.env.SPOTIFY_CLIENT_ID,
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
     redirectUri: process.env.SPOTIFY_REDIRECT_URI,
