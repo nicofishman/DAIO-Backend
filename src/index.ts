@@ -17,6 +17,9 @@ const PORT = 3000;
 app.use('/spotify', routerSpotify);
 app.use('/credentials', routerCredentials);
 app.use('/database', routerDatabase);
+app.get('/', (req, res) => {
+    res.send('Hello World');
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
