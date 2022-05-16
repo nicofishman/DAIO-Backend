@@ -1,7 +1,29 @@
 import { Client } from 'pg';
-import { User } from '../types';
 import 'dotenv/config';
 import { Request, Response } from 'express';
+
+type User = {
+    id: number,
+    spotifyId: string,
+    username: string,
+    avatarId: 1|2|3|4|5|6|7|8|9|10|11|12|13|14|15,
+    description: string
+}
+
+// type Interaction = {
+//     id: number,
+//     madeById: string,
+//     interactedWithId: string,
+//     decision: boolean,
+//     timestamp: Date
+// }
+
+// type itemXUser = {
+//     id: number,
+//     itemId: string,
+//     userId: string,
+//     order: number
+// }
 
 export const getUsers = async (_req: Request, res: Response): Promise<void> => {
     const client = new Client({

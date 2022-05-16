@@ -1,7 +1,14 @@
 import 'dotenv/config';
 import { Request, Response } from 'express';
 import { MysqlError, createConnection } from 'mysql';
-import { User } from '../types';
+
+type User = {
+    id: number,
+    spotifyId: string,
+    username: string,
+    avatarId: 1|2|3|4|5|6|7|8|9|10|11|12|13|14|15,
+    description: string
+}
 
 export const getUsers = async (_req: Request, res: Response): Promise<void> => {
     const con = createConnection({
