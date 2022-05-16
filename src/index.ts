@@ -17,7 +17,7 @@ const PORT = 3000;
 app.use('/spotify', routerSpotify);
 app.use('/credentials', routerCredentials);
 app.use('/database', routerDatabase);
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
     res.send('Hello World');
 });
 
