@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { Request, Response } from 'express';
-import { MysqlError, createConnection } from 'mysql';
+import { createConnection } from 'mysql';
 
 type User = {
     id: number,
@@ -17,11 +17,11 @@ export const getUsers = async (_req: Request, res: Response): Promise<void> => {
         password: process.env.DB_PASS,
         database: process.env.DB_NAME,
     });
-    con.connect(function (err: MysqlError) {
+    con.connect(function (err: any) {
         if (err) throw err;
         console.log('Connected!');
     });
-    con.query('SELECT * FROM users', function (err: MysqlError, result: User[]) {
+    con.query('SELECT * FROM users', function (err: any, result: User[]) {
         if (err) throw err;
         console.log(result);
         res.json(result);
@@ -37,17 +37,17 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
         password: process.env.DB_PASS,
         database: process.env.DB_NAME,
     });
-    con.connect(function (err: MysqlError) {
+    con.connect(function (err: any) {
         if (err) throw err;
         console.log('Connected!');
     });
 
     const userBySpotifyIdQuery = `SELECT * FROM users WHERE spotifyId = '${user.spotifyId}'`;
-    con.query(userBySpotifyIdQuery, function (err: MysqlError, result: User[]) {
+    con.query(userBySpotifyIdQuery, function (err: any, result: User[]) {
         if (err) throw err;
         if (result.length === 0) {
             const addUserQuery = `INSERT INTO users (spotifyId, username, avatarId, description) VALUES ('${user.spotifyId}', '${user.username}', ${user.avatarId}, '${user.description}')`;
-            con.query(addUserQuery, function (err: MysqlError, result: User[]) {
+            con.query(addUserQuery, function (err: any, result: User[]) {
                 if (err) throw err;
                 console.log(result);
                 res.json(result);
