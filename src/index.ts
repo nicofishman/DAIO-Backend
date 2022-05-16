@@ -12,7 +12,7 @@ app.use(cors()); // Middleware to enable CORS
 app.use(cookieParser()); // Middleware to enable cookies
 app.use(bodyParser.json()); // Middleware to enable cookies
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use('/spotify', routerSpotify);
 app.use('/credentials', routerCredentials);
