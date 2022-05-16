@@ -56,7 +56,7 @@ export const callback = (req: Request, res: Response) => {
     }
     spotifyApi
         .authorizationCodeGrant(code)
-        .then((data) => {
+        .then((data: any) => {
             const accessToken = data.body.access_token;
             const refreshToken = data.body.refresh_token;
             const expiresIn = data.body.expires_in;
@@ -78,7 +78,7 @@ export const callback = (req: Request, res: Response) => {
                 spotifyApi.setAccessToken(accessToken);
             }, (expiresIn / 2) * 1000);
         })
-        .catch((err) => {
+        .catch((err: any) => {
             console.log(
                 'Something went wrong when retrieving an access token',
                 err
@@ -100,10 +100,10 @@ export const getByAlbum = (req: Request, res: Response) => {
         res.clearCookie('redirect');
         spotifyApi
             .searchAlbums(req.params.album)
-            .then((data) => {
+            .then((data: any) => {
                 resSend(res, data);
             })
-            .catch((err) => {
+            .catch((err: any) => {
                 resSend(res, err);
             });
     }
@@ -117,10 +117,10 @@ export const getBySong = (req: Request, res: Response) => {
         res.clearCookie('redirect');
         spotifyApi
             .searchTracks(req.params.song)
-            .then((data) => {
+            .then((data: any) => {
                 resSend(res, data);
             })
-            .catch((err) => {
+            .catch((err: any) => {
                 resSend(res, err);
             });
     }
@@ -134,10 +134,10 @@ export const getByArtistName = (req: Request, res: Response) => {
         res.clearCookie('redirect');
         spotifyApi
             .searchArtists(req.params.artist)
-            .then((data) => {
+            .then((data: any) => {
                 resSend(res, data);
             })
-            .catch((err) => {
+            .catch((err: any) => {
                 resSend(res, err);
             });
     }
@@ -151,10 +151,10 @@ export const getActiveDevices = (_req: Request, res: Response) => {
         res.clearCookie('redirect');
         spotifyApi
             .getMyDevices()
-            .then((data) => {
+            .then((data: any) => {
                 resSend(res, data);
             })
-            .catch((err) => {
+            .catch((err: any) => {
                 resSend(res, err);
             });
     }
@@ -172,13 +172,13 @@ export const userTopArtists = (req: Request, res: Response) => {
     spotifyApi.resetAccessToken();
     spotifyApi.setAccessToken(accessToken);
     spotifyApi.getMyTopArtists({ limit: 50 }).then(
-        function (data) {
-            data.body.items.forEach((artist) => {
+        function (data: any) {
+            data.body.items.forEach((artist: any) => {
                 topArtists.push(artist.name);
             });
             res.end(JSON.stringify(topArtists));
         },
-        function (err) {
+        function (err: any) {
             console.log('Something went wrong!', err);
         }
     );
@@ -195,13 +195,13 @@ export const userTopTracks = (req: Request, res: Response) => {
     spotifyApi.resetAccessToken();
     spotifyApi.setAccessToken(accessToken);
     spotifyApi.getMyTopTracks({ limit: 50 }).then(
-        function (data) {
-            data.body.items.forEach((track) => {
+        function (data: any) {
+            data.body.items.forEach((track: any) => {
                 topTracks.push(track.name);
             });
             res.end(JSON.stringify(topTracks));
         },
-        function (err) {
+        function (err: any) {
             console.log('Something went wrong!, userTopTracks', err);
         }
     );
@@ -217,10 +217,10 @@ export const me = (req: Request, res: Response) => {
     spotifyApi.resetAccessToken();
     spotifyApi.setAccessToken(accessToken);
     spotifyApi.getMe().then(
-        function (data) {
+        function (data: any) {
             res.end(JSON.stringify(data.body));
         },
-        function (err) {
+        function (err: any) {
             console.log('Something went wrong!', err);
         }
     );
