@@ -1,6 +1,6 @@
+import { Client } from 'pg';
 import 'dotenv/config';
 import { Request, Response } from 'express';
-import { Pool } from 'pg';
 
 type User = {
     id: number,
@@ -26,17 +26,16 @@ type User = {
 // }
 
 export const getUsers = async (_req: Request, res: Response): Promise<void> => {
-    console.log({
-        connectionString: process.env.PGURL || process.env.POSTGRES_URL,
-        user: process.env.PGUSER || process.env.PG_USER,
-        database: process.env.PGNAME || process.env.PG_NAME,
-        password: process.env.PGPASS || process.env.PG_PASS,
-        ssl: false,
+    const client = new Client({
+        connectionString: process.env.PGURI || process.env.DATABASE_URL,
+        user: process.env.PGUSER,
+        database: process.env.PGNAME || process.env.PGDATABASE,
+        password: process.env.PGPASS || process.env.PGPASSWORD,
+        ssl: { rejectUnauthorized: false }
     });
-    const client = new Pool();
     await client.connect();
     const query = 'SELECT * FROM users';
-    client.query(query, (err: any, result: any) => {
+    client.query(query, (err: Error, result: any) => {
         if (err) {
             console.log('err' + err);
             res.json(err);
@@ -49,22 +48,23 @@ export const getUsers = async (_req: Request, res: Response): Promise<void> => {
 
 export const addUser = async (req: Request, res: Response): Promise<void> => {
     const user: User = req.body;
-    const client = new Pool({
-        connectionString: process.env.PGURL || process.env.POSTGRES_URL,
-        user: process.env.PGUSER || process.env.PG_USER,
-        database: process.env.PGNAME || process.env.PG_NAME,
-        password: process.env.PGPASS || process.env.PG_PASS,
-        ssl: false,
+    const client = new Client({
+        connectionString: process.env.PGURI || process.env.DATABASE_URL,
+        user: process.env.PGUSER,
+        database: process.env.PGNAME || process.env.PGDATABASE,
+        password: process.env.PGPASS || process.env.PGPASSWORD,
+        ssl: { rejectUnauthorized: false }
     });
     client.connect();
-    const query = `SELECT * FROM users WHERE spotifyId = '${user.spotifyId}'`;
+    const query = `SELECT * FROM users WHERE "spotifyId" = '${user.spotifyId}'`;
     client.query(query, (err: any, result: any) => {
         if (err) {
             console.log(err);
             res.json(err);
         } else if (result.rows.length === 0) {
-            const addUserQuery = `INSERT INTO users (spotifyId, username, avatarId, description) VALUES ('${user.spotifyId}', '${user.username}', ${user.avatarId}, '${user.description}')`;
-            client.query(addUserQuery, (err: any, result: any) => {
+            const addUserQuery = `INSERT INTO public.users("spotifyId", username, description, "avatarId") VALUES ($1, $2, $3, $4);`;
+            const values = [user.spotifyId, user.username, user.description, user.avatarId];
+            client.query(addUserQuery, values, (err: any, result: any) => {
                 if (err) {
                     console.log(err);
                     res.json(err);
