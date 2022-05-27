@@ -62,7 +62,7 @@ export const addUser = async (req: Request, res: Response): Promise<void> => {
             console.log(err);
             res.json(err);
         } else if (result.rows.length === 0) {
-            const addUserQuery = `INSERT INTO public.users("spotifyId", username, description, "avatarId") VALUES ($1, $2, $3, $4);`;
+            const addUserQuery = 'INSERT INTO public.users("spotifyId", username, description, "avatarId") VALUES ($1, $2, $3, $4);';
             const values = [user.spotifyId, user.username, user.description, user.avatarId];
             client.query(addUserQuery, values, (err: any, result: any) => {
                 if (err) {

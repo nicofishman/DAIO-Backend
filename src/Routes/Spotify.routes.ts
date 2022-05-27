@@ -8,7 +8,6 @@ import {
     getAccessToken,
     me,
     getByAlbum,
-    getActiveDevices,
     getBySong
 } from '../Controllers/Spotify.controller';
 
@@ -23,6 +22,5 @@ routerSpotify.get('/topartists', userTopArtists);
 routerSpotify.get('/toptracks', userTopTracks);
 routerSpotify.get('/token', getAccessToken);
 routerSpotify.get('/me', me);
-routerSpotify.get('/devices', getActiveDevices);
 
 export default routerSpotify;
