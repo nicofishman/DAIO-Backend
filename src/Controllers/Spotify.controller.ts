@@ -8,7 +8,7 @@ const spotifyApi: any = new SpotifyWebApi({
     redirectUri: process.env.SPOTIFY_REDIRECT_URI || 'http://localhost:3000/spotify/callback',
 });
 
-const resSend = (res: Response, data: any) => {
+export const resSend = (res: Response, data: any) => {
     res.set({ 'content-type': 'application/json; charset=utf-8' });
     res.statusCode = data.statusCode || 200;
     res.end(JSON.stringify(data.body || data, null, 2));
@@ -149,6 +149,46 @@ export const getByArtistName = (req: Request, res: Response) => {
     res.clearCookie('redirect');
     spotifyApi
         .searchArtists(req.params.artist)
+        .then((data: any) => {
+            resSend(res, data);
+        })
+        .catch((err: any) => {
+            resSend(res, err);
+        });
+};
+
+export const getSongById = (req: Request, res: Response) => {
+    const accessToken = req.get('accessToken');
+    if (accessToken == null) {
+        console.log('accessToken is null');
+        resSend(res, { error: 'No access token' });
+        return;
+    }
+    spotifyApi.resetAccessToken();
+    spotifyApi.setAccessToken(accessToken);
+    res.clearCookie('redirect');
+    spotifyApi
+        .getTrack(req.params.id)
+        .then((data: any) => {
+            resSend(res, data);
+        })
+        .catch((err: any) => {
+            resSend(res, err);
+        });
+};
+
+export const getArtistById = (req: Request, res: Response) => {
+    const accessToken = req.get('accessToken');
+    if (accessToken == null) {
+        console.log('accessToken is null');
+        resSend(res, { error: 'No access token' });
+        return;
+    }
+    spotifyApi.resetAccessToken();
+    spotifyApi.setAccessToken(accessToken);
+    res.clearCookie('redirect');
+    spotifyApi
+        .getArtist(req.params.id)
         .then((data: any) => {
             resSend(res, data);
         })
