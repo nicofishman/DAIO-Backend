@@ -22,7 +22,7 @@ type Artist = {
     id: string,
     name: string,
     images: {url: string}[],
-    genres: string,
+    genres: string[],
 }
 
 type Track = {
@@ -32,17 +32,6 @@ type Track = {
     album: Album,
     duration_ms: number,
 }
-
-// type UserAndInfo = {
-//     id: number,
-//     spotifyId: string,
-//     username: string,
-//     avatarId: 1|2|3|4|5|6|7|8|9|10|11|12|13|14|15,
-//     description: string,
-//     tracks: Track[],
-//     artists: Artist[],
-// }
-
 // type Interaction = {
 //     id: number,
 //     madeById: string,
@@ -51,20 +40,32 @@ type Track = {
 //     timestamp: Date
 // }
 
-// type itemXUser = {
-//     id: number,
-//     itemId: string,
-//     userId: string,
-//     order: number
-// }
-
 const getTrackInside = async (accessToken: string, trackId: string) => {
-    const track = await axios.get(`https://api.spotify.com/v1/tracks/${trackId}?market=ES`, {
-        headers: {
-            Authorization: `Bearer ${accessToken}`
-        }
-    });
-    return track.data;
+    try {
+        const track = await axios.get(`https://api.spotify.com/v1/tracks/${trackId}?market=ES`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+        return track.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+};
+
+const getArtistInside = async (accessToken: string, artistId: string) => {
+    try {
+        const artist = await axios.get(`https://api.spotify.com/v1/artists/${artistId}?market=ES`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+        return artist.data;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
 };
 
 export const getUsersAndInfo = async (req: Request, res: Response): Promise<void> => {
@@ -92,6 +93,9 @@ export const getUsersAndInfo = async (req: Request, res: Response): Promise<void
     const tracks: Track[] = [];
     await Promise.all(result2.rows.map(async (row: any) => {
         const track = await getTrackInside(accessToken, row.trackId);
+        if (!track) {
+            return;
+        }
         tracks.push({
             id: row.trackId,
             name: track.name,
@@ -112,13 +116,29 @@ export const getUsersAndInfo = async (req: Request, res: Response): Promise<void
         });
     }));
 
-    console.log('tracks:', tracks);
+    const query3 = 'SELECT * FROM artistxuser WHERE "fkUser" = $1 ORDER BY "orden" ASC';
+    const result3 = await client.query(query3, [userId]);
+    const artists: Artist[] = [];
+    await Promise.all(result3.rows.map(async (row: any) => {
+        const artist = await getArtistInside(accessToken, row.artistId);
+        if (!artist) {
+            return;
+        }
+        artists.push({
+            id: row.artistId,
+            name: artist.name,
+            images: artist.images[0].url,
+            genres: artist.genres,
+        });
+    }));
+
     resSend(res, {
         spotifyId: user.spotifyId,
         username: user.username,
         avatarId: user.avatarId,
         description: user.description,
         canciones: tracks,
+        artistas: artists,
     });
 };
 
