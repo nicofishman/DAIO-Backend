@@ -5,7 +5,7 @@ export const getSpotifyCredentials = async (_req: Request, res: Response) => {
     try {
         const clientId = process.env.SPOTIFY_CLIENT_ID;
         const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-        const redirectUri = process.env.SPOTIFY_REDIRECT_URI_MOBILE;
+        const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
         const spotifyCredentials = { clientId, clientSecret, redirectUri };
         res.json(spotifyCredentials);
     } catch (error) {
