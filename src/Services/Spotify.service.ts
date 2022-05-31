@@ -1,17 +1,17 @@
 import SpotifyWebApi from 'spotify-web-api-node';
 import 'dotenv/config';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 
 const spotifyApi: any = new SpotifyWebApi({
     clientId: process.env.SPOTIFY_CLIENT_ID,
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
     redirectUri: process.env.SPOTIFY_REDIRECT_URI || 'http://localhost:3000/spotify/callback',
 });
-
-export const resSend = (res: Response, data: any) => {
-    res.set({ 'content-type': 'application/json; charset=utf-8' });
-    res.statusCode = data.statusCode || 200;
-    res.end(JSON.stringify(data.body || data, null, 2));
+const resSend = (code: number, termo: object) => {
+    return {
+        statusCode: code,
+        body: termo,
+    };
 };
 
 const scopes: string[] = [
@@ -75,53 +75,43 @@ export const callback = async (res: Response, redirect: string, code: string) =>
     return returnValue;
 };
 
-export const getAccessToken = (_req: Request, res: Response) => {
+export const getAccessToken = () => {
     try {
         const accessToken = spotifyApi.getAccessToken();
-        resSend(res, accessToken);
+        return (resSend(200, { accessToken }));
     } catch (error) {
-        console.log(error);
-        resSend(res, error);
+        return (resSend(500, { error }));
     }
 };
 
-export const getByAlbum = (req: Request, res: Response) => {
-    if (spotifyApi.getAccessToken() == null) {
-        res.cookie('redirect', `/spotify/album/${req.params.album}`);
-        res.redirect('/spotify/login');
-    } else {
-        res.clearCookie('redirect');
-        spotifyApi
-            .searchAlbums(req.params.album)
-            .then((data: any) => {
-                resSend(res, data);
-            })
-            .catch((err: any) => {
-                resSend(res, err);
-            });
-    }
-};
-
-export const getBySong = (req: Request, res: Response) => {
-    const accessToken = req.get('accessToken');
-    if (accessToken == null) {
-        console.log('accessToken is null');
-        resSend(res, { error: 'No access token' });
-        return;
-    }
+export const getByAlbum = async (accessToken: string, query: any) => {
     spotifyApi.resetAccessToken();
     spotifyApi.setAccessToken(accessToken);
-
-    res.clearCookie('redirect');
-    console.log(req.params.song);
-    spotifyApi
-        .searchTracks(req.params.song)
+    let returnValue = {};
+    await spotifyApi
+        .searchAlbums(query)
         .then((data: any) => {
-            resSend(res, data);
+            returnValue = resSend(200, data.body);
         })
         .catch((err: any) => {
-            resSend(res, err);
+            returnValue = resSend(err.statusCode, err);
         });
+    return returnValue;
+};
+
+export const getBySong = async (accessToken: string, query: any) => {
+    spotifyApi.resetAccessToken();
+    spotifyApi.setAccessToken(accessToken);
+    let returnValue = {};
+    await spotifyApi
+        .searchTracks(query)
+        .then((data: any) => {
+            returnValue = resSend(200, data.body);
+        })
+        .catch((err: any) => {
+            returnValue = resSend(err.statusCode, err);
+        });
+    return returnValue;
 };
 
 export const getByArtistName = async (accessToken: string, query: string, res: Response) => {
@@ -141,44 +131,34 @@ export const getByArtistName = async (accessToken: string, query: string, res: R
     return returnValue;
 };
 
-export const getSongById = (req: Request, res: Response) => {
-    const accessToken = req.get('accessToken');
-    if (accessToken == null) {
-        console.log('accessToken is null');
-        resSend(res, { error: 'No access token' });
-        return;
-    }
+export const getSongById = async (accessToken: string, query: string) => {
     spotifyApi.resetAccessToken();
     spotifyApi.setAccessToken(accessToken);
-    res.clearCookie('redirect');
-    spotifyApi
-        .getTrack(req.params.id)
+    let returnValue = {};
+    await spotifyApi
+        .getTrack(query)
         .then((data: any) => {
-            resSend(res, data);
+            returnValue = resSend(200, data.body);
         })
         .catch((err: any) => {
-            resSend(res, err);
+            returnValue = resSend(err.statusCode, err);
         });
+    return returnValue;
 };
 
-export const getArtistById = (req: Request, res: Response) => {
-    const accessToken = req.get('accessToken');
-    if (accessToken == null) {
-        console.log('accessToken is null');
-        resSend(res, { error: 'No access token' });
-        return;
-    }
+export const getArtistById = async (accessToken: string, query: string) => {
     spotifyApi.resetAccessToken();
     spotifyApi.setAccessToken(accessToken);
-    res.clearCookie('redirect');
-    spotifyApi
-        .getArtist(req.params.id)
+    let returnValue = {};
+    await spotifyApi
+        .getArtist(query)
         .then((data: any) => {
-            resSend(res, data);
+            returnValue = resSend(200, data.body);
         })
         .catch((err: any) => {
-            resSend(res, err);
+            returnValue = resSend(err.statusCode, err);
         });
+    return returnValue;
 };
 
 export const userTopArtists = async (accessToken: string) => {
@@ -189,56 +169,49 @@ export const userTopArtists = async (accessToken: string) => {
 
     await spotifyApi.getMyTopArtists({ limit: 50 }).then(
         function (data: any) {
-            returnValue = [];
+            const topArtists: string[] = [];
             data.body.items.forEach((artist: any) => {
-                returnValue.push(artist.name);
+                topArtists.push(artist.name);
             });
+            returnValue = resSend(200, topArtists);
         },
         function (err: any) {
-            returnValue = err;
+            returnValue = resSend(err.statusCode, { error: err });
         }
     );
     return returnValue;
 };
 
-export const userTopTracks = (req: Request, res: Response) => {
+export const userTopTracks = async (accessToken: string) => {
     const topTracks: string[] = [];
-    const accessToken = req.get('accessToken');
-    // console.log('userTopTracks', accessToken?.length);
-    if (accessToken == null) {
-        resSend(res, { error: 'No access token' });
-        return;
-    }
+    let returnValue = {};
     spotifyApi.resetAccessToken();
     spotifyApi.setAccessToken(accessToken);
-    spotifyApi.getMyTopTracks({ limit: 50 }).then(
+    await spotifyApi.getMyTopTracks({ limit: 50 }).then(
         function (data: any) {
             data.body.items.forEach((track: any) => {
                 topTracks.push(track.name);
             });
-            resSend(res, data);
+            returnValue = resSend(200, topTracks);
         },
         function (err: any) {
-            resSend(res, err);
+            returnValue = resSend(err.statusCode, err);
         }
     );
+    return returnValue;
 };
 
-export const me = async (req: Request, res: Response) => {
-    const accessToken = req.get('accessToken');
-    // console.log('me', accessToken?.length);
-    if (accessToken == null) {
-        resSend(res, { error: 'No access token' });
-        return;
-    }
+export const me = async (accessToken: string) => {
+    let returnValue = {};
     await spotifyApi.resetAccessToken();
     await spotifyApi.setAccessToken(accessToken);
-    spotifyApi.getMe().then(
+    await spotifyApi.getMe().then(
         function (data: any) {
-            resSend(res, data);
+            returnValue = resSend(200, data.body);
         },
         function (err: any) {
-            resSend(res, err);
+            returnValue = resSend(err.statusCode, err);
         }
     );
+    return returnValue;
 };
