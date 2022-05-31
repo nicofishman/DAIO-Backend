@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import * as service from '../Services/Credentials.service';
 
 export const getSpotifyCredentials = async (_req: Request, res: Response) => {
-    const creds = await service.getFirebaseCredentials();
+    const creds = await service.getSpotifyCredentials();
     res.json(creds);
 };
 
