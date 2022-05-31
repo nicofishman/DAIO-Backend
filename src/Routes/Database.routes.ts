@@ -3,7 +3,7 @@ import {
     getUsers,
     addUser,
     getUsersAndInfo,
-} from '../Controllers/Postgres.controller';
+} from '../Services/Postgres.service';
 
 const databaseRouter = Router();
 

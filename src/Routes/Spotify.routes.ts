@@ -11,7 +11,7 @@ import {
     getBySong,
     getSongById,
     getArtistById
-} from '../Controllers/Spotify.controller';
+} from '../Services/Spotify.service';
 
 const routerSpotify = Router();
 
