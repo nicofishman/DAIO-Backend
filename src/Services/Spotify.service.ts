@@ -7,7 +7,7 @@ const spotifyApi: any = new SpotifyWebApi({
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
     redirectUri: process.env.SPOTIFY_REDIRECT_URI || 'http://localhost:3000/spotify/callback',
 });
-const resSend = (code: number, termo: object) => {
+export const resSend = (code: number, termo: object) => {
     return {
         statusCode: code,
         body: termo,
