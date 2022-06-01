@@ -1,18 +1,13 @@
 import SpotifyWebApi from 'spotify-web-api-node';
 import 'dotenv/config';
 import { Response } from 'express';
+import { resSend } from '../Utils/response';
 
 const spotifyApi: any = new SpotifyWebApi({
     clientId: process.env.SPOTIFY_CLIENT_ID,
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
     redirectUri: process.env.SPOTIFY_REDIRECT_URI || 'http://localhost:3000/spotify/callback',
 });
-export const resSend = (code: number, termo: object) => {
-    return {
-        statusCode: code,
-        body: termo,
-    };
-};
 
 const scopes: string[] = [
     'ugc-image-upload',
