@@ -121,6 +121,7 @@ export const getUserInfo = async (accessToken: string, user: DBUser) => {
             genres: artist.genres,
         });
     }));
+    await client.end();
     return resSend(200, {
         ...user,
         canciones: tracks,
@@ -218,9 +219,10 @@ export const getUsers = async () => {
 
     try {
         const returnValue = await client.query(query);
+        await client.end();
         return resSend(200, returnValue.rows);
     } catch (error: any) {
-        // console.log('error', error);
+        await client.end();
         return resSend(500, error);
     }
 };
@@ -257,5 +259,6 @@ export const addUser = async (user: DBUser) => {
         .catch(async (error: any) => {
             return resSend(500, error);
         });
+    await client.end();
     return response;
 };
