@@ -48,25 +48,25 @@ const getTrackInside = async (accessToken: string, trackId: string) => {
             }
         });
         return track.data;
+    } catch (error: any) {
+        console.log(error.response.status);
+        return null;
+    }
+};
+
+const getArtistInside = async (accessToken: string, artistId: string) => {
+    try {
+        const artist = await axios.get(`https://api.spotify.com/v1/artists/${artistId}?market=ES`, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+        return artist.data;
     } catch (error) {
         console.log(error);
         return null;
     }
 };
-
-// const getArtistInside = async (accessToken: string, artistId: string) => {
-//     try {
-//         const artist = await axios.get(`https://api.spotify.com/v1/artists/${artistId}?market=ES`, {
-//             headers: {
-//                 Authorization: `Bearer ${accessToken}`
-//             }
-//         });
-//         return artist.data;
-//     } catch (error) {
-//         console.log(error);
-//         return null;
-//     }
-// };
 
 export const getUserInfo = async (accessToken: string, user: DBUser) => {
     const client = new Client({
@@ -77,7 +77,6 @@ export const getUserInfo = async (accessToken: string, user: DBUser) => {
         ssl: { rejectUnauthorized: false }
     });
     await client.connect();
-
     const query2 = `SELECT * FROM trackxuser WHERE "fkUser" = '${user.spotifyId}' ORDER BY "orden" ASC`;
     const result2 = await client.query(query2)
         .then((resp: any) => resp);
@@ -106,9 +105,26 @@ export const getUserInfo = async (accessToken: string, user: DBUser) => {
             duration_ms: track.duration_ms,
         });
     }));
+
+    const query3 = `SELECT * FROM artistxuser WHERE "fkUser" = '${user.spotifyId}' ORDER BY "orden" ASC`;
+    const result3 = await client.query(query3);
+    const artists: Artist[] = [];
+    await Promise.all(result3.rows.map(async (row: any) => {
+        const artist = await getArtistInside(accessToken, row.artistId);
+        if (!artist) {
+            return;
+        }
+        artists.push({
+            id: row.artistId,
+            name: artist.name,
+            images: artist.images,
+            genres: artist.genres,
+        });
+    }));
     return resSend(200, {
         ...user,
         canciones: tracks,
+        artistas: artists,
         // artistas: artists,
     });
 };
@@ -204,7 +220,7 @@ export const getUsers = async () => {
         const returnValue = await client.query(query);
         return resSend(200, returnValue.rows);
     } catch (error: any) {
-        console.log(error);
+        // console.log('error', error);
         return resSend(500, error);
     }
 };
@@ -230,7 +246,7 @@ export const addUser = async (user: DBUser) => {
                         response2 = resSend(201, result2);
                     })
                     .catch((error: any) => {
-                        console.log(error);
+                        // console.log('error', error);
                         response2 = resSend(500, error);
                     });
                 return response2;
