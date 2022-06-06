@@ -15,7 +15,7 @@ export type DBUser = {
 type Album = {
     id: string,
     name: string,
-    img: string,
+    img: string[],
 }
 
 type Artist = {
@@ -30,6 +30,7 @@ type Track = {
     name: string,
     artists: Artist[],
     album: Album,
+    preview_url: string,
     duration_ms: number,
 }
 // type Interaction = {
@@ -89,6 +90,7 @@ export const getUserInfo = async (accessToken: string, user: DBUser) => {
         tracks.push({
             id: row.trackId,
             name: track.name,
+            preview_url: track.preview_url,
             album: {
                 id: track.album.id,
                 name: track.album.name,
@@ -129,82 +131,6 @@ export const getUserInfo = async (accessToken: string, user: DBUser) => {
         // artistas: artists,
     });
 };
-
-// export const getUsersAndInfo = async (req: Request, res: Response): Promise<void> => {
-//     const userId = req.get('userId');
-//     const accessToken = req.get('accessToken');
-//     if (!accessToken) {
-//         resSend(res, { error: 'Missing accessToken' });
-//         return;
-//     }
-
-//     const users = await getUsers(req, res);
-//     console.log('users', users);
-//     const client = new Client({
-//         connectionString: process.env.PGURI || process.env.DATABASE_URL,
-//         user: process.env.PGUSER,
-//         database: process.env.PGNAME || process.env.PGDATABASE,
-//         password: process.env.PGPASS || process.env.PGPASSWORD,
-//         ssl: { rejectUnauthorized: false }
-//     });
-//     await client.connect();
-//     const query = 'SELECT * FROM users WHERE "spotifyId" = $1';
-//     const result = await client.query(query, [userId]);
-//     const user: DBUser = result.rows[0];
-//     const query2 = 'SELECT * FROM trackxuser WHERE "fkUser" = $1 ORDER BY "orden" ASC';
-//     const result2 = await client.query(query2, [userId]);
-
-//     const tracks: Track[] = [];
-//     await Promise.all(result2.rows.map(async (row: any) => {
-//         const track = await getTrackInside(accessToken, row.trackId);
-//         if (!track) {
-//             return;
-//         }
-//         tracks.push({
-//             id: row.trackId,
-//             name: track.name,
-//             album: {
-//                 id: track.album.id,
-//                 name: track.album.name,
-//                 img: track.album.images[0].url,
-//             },
-//             artists: track.artists.map((artist: any) => {
-//                 return {
-//                     id: artist.id,
-//                     name: artist.name,
-//                     images: artist.images,
-//                     genres: artist.genres,
-//                 };
-//             }),
-//             duration_ms: track.duration_ms,
-//         });
-//     }));
-
-//     const query3 = 'SELECT * FROM artistxuser WHERE "fkUser" = $1 ORDER BY "orden" ASC';
-//     const result3 = await client.query(query3, [userId]);
-//     const artists: Artist[] = [];
-//     await Promise.all(result3.rows.map(async (row: any) => {
-//         const artist = await getArtistInside(accessToken, row.artistId);
-//         if (!artist) {
-//             return;
-//         }
-//         artists.push({
-//             id: row.artistId,
-//             name: artist.name,
-//             images: artist.images[0].url,
-//             genres: artist.genres,
-//         });
-//     }));
-
-//     resSend(res, {
-//         spotifyId: user.spotifyId,
-//         username: user.username,
-//         avatarId: user.avatarId,
-//         description: user.description,
-//         canciones: tracks,
-//         artistas: artists,
-//     });
-// };
 
 export const getUsers = async () => {
     const client = new Client({
