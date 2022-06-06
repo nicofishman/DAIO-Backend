@@ -3,7 +3,7 @@ import {
     getUsers,
     addUser,
     getUsersAndInfo,
-} from '../Controllers/Postgres.controller';
+} from '../Controllers/Prisma.controller';
 
 const databaseRouter = Router();
 

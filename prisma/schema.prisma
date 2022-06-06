@@ -1,0 +1,49 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Artist {
+    artistId String
+    fkUser   String
+    user     User   @relation(fields: [fkUser], references: [spotifyId])
+    orden    Int
+
+    @@id([artistId, fkUser, orden])
+    @@map("artistxuser")
+}
+
+model interactions {
+    madeById         String
+    interactedWithId String
+    decision         Boolean
+    timestamp        DateTime @db.Timestamp(6)
+    id               Int      @default(autoincrement())
+
+    @@id([madeById, interactedWithId, id])
+}
+
+model Track {
+    trackId String
+    fkUser  String
+    user    User   @relation(fields: [fkUser], references: [spotifyId])
+    orden   Int
+
+    @@id([trackId, fkUser, orden])
+    @@map("trackxuser")
+}
+
+model User {
+    spotifyId   String   @id
+    username    String
+    description String
+    avatarId    Decimal  @db.Decimal
+    tracks      Track[]
+    artists     Artist[]
+
+    @@map("users")
+}

@@ -71,10 +71,7 @@ const getArtistInside = async (accessToken: string, artistId: string) => {
 
 export const getUserInfo = async (accessToken: string, user: DBUser) => {
     const client = new Client({
-        connectionString: process.env.PGURI || process.env.DATABASE_URL,
-        user: process.env.PGUSER,
-        database: process.env.PGNAME || process.env.PGDATABASE,
-        password: process.env.PGPASS || process.env.PGPASSWORD,
+        connectionString: process.env.DATABASE_URL,
         ssl: { rejectUnauthorized: false }
     });
     await client.connect();
@@ -134,10 +131,7 @@ export const getUserInfo = async (accessToken: string, user: DBUser) => {
 
 export const getUsers = async () => {
     const client = new Client({
-        connectionString: process.env.PGURI || process.env.DATABASE_URL,
-        user: process.env.PGUSER,
-        database: process.env.PGNAME || process.env.PGDATABASE,
-        password: process.env.PGPASS || process.env.PGPASSWORD,
+        connectionString: process.env.DATABASE_URL,
         ssl: { rejectUnauthorized: false }
     });
     await client.connect();
@@ -155,10 +149,7 @@ export const getUsers = async () => {
 
 export const addUser = async (user: DBUser) => {
     const client = new Client({
-        connectionString: process.env.PGURI || process.env.DATABASE_URL,
-        user: process.env.PGUSER,
-        database: process.env.PGNAME || process.env.PGDATABASE,
-        password: process.env.PGPASS || process.env.PGPASSWORD,
+        connectionString: process.env.DATABASE_URL,
         ssl: { rejectUnauthorized: false }
     });
     await client.connect();
