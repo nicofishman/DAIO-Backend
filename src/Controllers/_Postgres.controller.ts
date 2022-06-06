@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import * as service from '../Services/Postgres.service';
-import { DBUser } from '../Services/Postgres.service';
+import * as service from '../Services/_Postgres.service';
+import { DBUser } from '../Services/_Postgres.service';
 
 export const getUsers = async (_req: Request, res: Response): Promise<void> => {
     const response: any = await service.getUsers();
