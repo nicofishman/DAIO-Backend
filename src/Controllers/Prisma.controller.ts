@@ -84,7 +84,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
             }
             const myUser: userDB = userInfo.body;
             const userTracks: any[] = [];
-            await Promise.all(myUser.tracks.map(async (track: Track) => {
+            await Promise.all(myUser.tracks.map(async (track: Track): Promise<void | object> => {
                 const spotiTrack: any = await getSongById(accessToken, track.trackId);
                 if (spotiTrack.statusCode !== 200) {
                     return resSend(404, `Track not found: ${track.trackId}, ${spotiTrack.body}`);
