@@ -68,7 +68,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
                 .then((userInfo) => {
                     if (!userInfo) {
                         console.log('User not found');
-                        throw new Error('User not found');
+                        return resSend(404, 'User not found');
                     }
                     return resSend(200, userInfo);
                 })
@@ -87,8 +87,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
             await Promise.all(myUser.tracks.map(async (track: Track) => {
                 const spotiTrack: any = await getSongById(accessToken, track.trackId);
                 if (spotiTrack.statusCode !== 200) {
-                    console.log('Track not found');
-                    throw new Error(`Track not found: ${track.trackId}, ${spotiTrack.body}`);
+                    return resSend(404, `Track not found: ${track.trackId}, ${spotiTrack.body}`);
                 }
 
                 const myTrack = spotiTrack.body;
