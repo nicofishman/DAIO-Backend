@@ -15,23 +15,17 @@ export const prismaAddUser = async (prisma: PrismaClient, user: any) => {
 };
 
 export const getUserInfo = async (prisma: PrismaClient, user: User) => {
-    const userWithInfo: User & {tracks: Track[], artists: Artist[]} | null = await prisma.user.findFirst({
+    const userWithInfo: User & { tracks: Track[], artists: Artist[] } | null = await prisma.user.findFirst({
         where: {
             spotifyId: user.spotifyId,
         },
         include: {
             tracks: {
-                where: {
-                    fkUser: user.spotifyId,
-                },
                 orderBy: {
                     orden: 'asc',
                 }
             },
             artists: {
-                where: {
-                    fkUser: user.spotifyId,
-                },
                 orderBy: {
                     orden: 'asc',
                 }

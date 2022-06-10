@@ -4,6 +4,8 @@ import { resSend } from '../Utils/response';
 import { Request, Response } from 'express';
 import { getArtistById, getSongById } from '../Services/Spotify.service';
 
+type userDB = User & { tracks: Track[], artists: Artist[] };
+
 const prisma = new PrismaClient();
 
 export const getUsers = async (_req: Request, res: Response) => {
@@ -80,7 +82,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
             if (userInfo.statusCode !== 200) {
                 res.status(userInfo.statusCode).send(userInfo.body);
             }
-            const myUser = userInfo.body;
+            const myUser: userDB = userInfo.body;
             const userTracks: any[] = [];
             await Promise.all(myUser.tracks.map(async (track: Track) => {
                 const spotiTrack: any = await getSongById(accessToken, track.trackId);
@@ -94,6 +96,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
                     id: track.trackId,
                     name: myTrack.name,
                     preview_url: myTrack.preview_url,
+                    orden: track.orden,
                     album: {
                         id: myTrack.album.id,
                         name: myTrack.album.name,
@@ -119,16 +122,19 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
                     name: myArtist.name,
                     images: myArtist.images,
                     genres: myArtist.genres,
+                    orden: artist.orden,
                 });
             }));
 
+            userTracks.sort((a, b) => a.orden - b.orden);
+            userArtists.sort((a, b) => a.orden - b.orden);
             userInfo.statusCode === 200 &&
-            usersAndInfo.push(
-                {
-                    ...user,
-                    canciones: userTracks,
-                    artistas: userArtists
-                });
+                usersAndInfo.push(
+                    {
+                        ...user,
+                        canciones: userTracks,
+                        artistas: userArtists
+                    });
         })
     );
     res.status(200).send(usersAndInfo);
