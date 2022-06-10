@@ -164,9 +164,12 @@ export const userTopArtists = async (accessToken: string) => {
 
     await spotifyApi.getMyTopArtists({ limit: 50 }).then(
         function (data: any) {
-            const topArtists: string[] = [];
+            const topArtists: any = [];
             data.body.items.forEach((artist: any) => {
-                topArtists.push(artist.name);
+                topArtists.push({
+                    name: artist.name,
+                    img: artist.images[0].url,
+                });
             });
             returnValue = resSend(200, topArtists);
         },
@@ -178,14 +181,17 @@ export const userTopArtists = async (accessToken: string) => {
 };
 
 export const userTopTracks = async (accessToken: string) => {
-    const topTracks: string[] = [];
+    const topTracks: any = [];
     let returnValue = {};
     spotifyApi.resetAccessToken();
     spotifyApi.setAccessToken(accessToken);
     await spotifyApi.getMyTopTracks({ limit: 50 }).then(
         function (data: any) {
             data.body.items.forEach((track: any) => {
-                topTracks.push(track.name);
+                topTracks.push({
+                    name: track.name,
+                    img: track.album.images[0].url,
+                });
             });
             returnValue = resSend(200, topTracks);
         },
