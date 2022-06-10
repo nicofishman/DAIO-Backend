@@ -97,6 +97,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
                     name: myTrack.name,
                     preview_url: myTrack.preview_url,
                     orden: track.orden,
+                    duration: myTrack.duration_ms,
                     album: {
                         id: myTrack.album.id,
                         name: myTrack.album.name,
