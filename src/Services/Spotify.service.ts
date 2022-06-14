@@ -191,6 +191,7 @@ export const userTopTracks = async (accessToken: string) => {
                 topTracks.push({
                     name: track.name,
                     img: track.album.images[0].url,
+                    artists: track.artists.map((artist: any) => artist.name),
                 });
             });
             returnValue = resSend(200, topTracks);
