@@ -167,6 +167,7 @@ export const userTopArtists = async (accessToken: string) => {
             const topArtists: any = [];
             data.body.items.forEach((artist: any) => {
                 topArtists.push({
+                    id: artist.id,
                     name: artist.name,
                     img: artist.images[0].url,
                 });
@@ -189,6 +190,7 @@ export const userTopTracks = async (accessToken: string) => {
         function (data: any) {
             data.body.items.forEach((track: any) => {
                 topTracks.push({
+                    id: track.id,
                     name: track.name,
                     img: track.album.images[0].url,
                     artists: track.artists.map((artist: any) => artist.name),
