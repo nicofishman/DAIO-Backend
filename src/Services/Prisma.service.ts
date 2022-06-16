@@ -5,11 +5,33 @@ export const prismaGetUsers = async (prisma: PrismaClient) => {
     return users;
 };
 
-export const prismaAddUser = async (prisma: PrismaClient, user: any) => {
+export const prismaAddUser = async (prisma: PrismaClient, user: User & { tracks: Track[], artists: Artist[] }) => {
+    const tracksData: Omit<Track, 'fkUser'>[] = user.tracks.map((track: Track, index: number) => ({
+        trackId: track.trackId,
+        orden: index + 1,
+    }));
+
+    const artistsData: Omit<Artist, 'fkUser'>[] = user.artists.map((artist: Artist, index: number) => ({
+        artistId: artist.artistId,
+        orden: index + 1,
+    }));
     const newUser = await prisma.user.create({
         data: {
-            ...user,
+            spotifyId: user.spotifyId,
+            username: user.username,
+            description: user.description,
+            avatarId: user.avatarId,
+            tracks: {
+                create: tracksData
+            },
+            artists: {
+                create: artistsData
+            },
         },
+        include: {
+            tracks: true,
+            artists: true,
+        }
     });
     return newUser;
 };
