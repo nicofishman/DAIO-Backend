@@ -10,7 +10,7 @@ datasource db {
 model Artist {
     artistId String
     fkUser   String
-    user     User?  @relation(fields: [fkUser], references: [spotifyId])
+    user     User?  @relation(fields: [fkUser], references: [spotifyId], onDelete: Cascade)
     orden    Int
 
     @@id([artistId, fkUser, orden])
@@ -30,7 +30,7 @@ model interactions {
 model Track {
     trackId String
     fkUser  String
-    user    User?  @relation(fields: [fkUser], references: [spotifyId])
+    user    User?  @relation(fields: [fkUser], references: [spotifyId], onDelete: Cascade)
     orden   Int
 
     @@id([trackId, fkUser, orden])
