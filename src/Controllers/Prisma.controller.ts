@@ -60,7 +60,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
         res.status(response.statusCode).send(response.body);
     }
     const usersAndInfo: any = [];
-    const users = response.body;
+    const users = req.body || response.body;
 
     await Promise.all(
         users.map(async (user: User) => {
@@ -146,7 +146,7 @@ export const notMatchedUsers = async (req: Request, res: Response) => {
         res.status(401).send({ error: 'Missing userId' });
         return;
     }
-    const response: any = await service.getNotMatchedUsers(prisma, userId);
+    const response: any = await service.getNotMatchedUsers(prisma, req, res, userId);
     res.status(response.statusCode).send(response.body);
 };
 

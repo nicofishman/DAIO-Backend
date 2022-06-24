@@ -1,4 +1,6 @@
 import { Artist, interactions, PrismaClient, Track, User } from '@prisma/client';
+import { Response, Request } from 'express';
+import { getUsersAndInfo } from '../Controllers/Prisma.controller';
 import { resSend } from '../Utils/response';
 
 export const prismaGetUsers = async (prisma: PrismaClient) => {
@@ -58,7 +60,7 @@ export const getUserInfo = async (prisma: PrismaClient, user: User) => {
     return userWithInfo;
 };
 
-export const getNotMatchedUsers = async (prisma: PrismaClient, userId: string) => {
+export const getNotMatchedUsers = async (prisma: PrismaClient, req: Request, res: Response, userId: string) => {
     try {
         const matchedIds = await prisma.interactions.findMany({
             where: {
@@ -87,7 +89,9 @@ export const getNotMatchedUsers = async (prisma: PrismaClient, userId: string) =
                 artists: true,
             },
         });
-        return resSend(200, users);
+        req.body = users;
+        const usersWithInfo: any = await getUsersAndInfo(req, res);
+        return resSend(200, usersWithInfo);
     } catch (error: any) {
         return resSend(500, error);
     }
