@@ -1,4 +1,5 @@
-import { Artist, PrismaClient, Track, User } from '@prisma/client';
+import { Artist, interactions, PrismaClient, Track, User } from '@prisma/client';
+import { resSend } from '../Utils/response';
 
 export const prismaGetUsers = async (prisma: PrismaClient) => {
     const users = await prisma.user.findMany();
@@ -55,4 +56,74 @@ export const getUserInfo = async (prisma: PrismaClient, user: User) => {
         },
     });
     return userWithInfo;
+};
+
+export const getNotMatchedUsers = async (prisma: PrismaClient, userId: string) => {
+    try {
+        const matchedIds = await prisma.interactions.findMany({
+            where: {
+                madeById: userId,
+            }
+        }).then((interactions: interactions[]) => {
+            return interactions.map((interaction) => interaction.interactedWithId);
+        });
+        const users = await prisma.user.findMany({
+            where: {
+                AND: [
+                    {
+                        spotifyId: {
+                            not: userId,
+                        }
+                    },
+                    {
+                        spotifyId: {
+                            notIn: matchedIds,
+                        }
+                    }
+                ]
+            },
+            include: {
+                tracks: true,
+                artists: true,
+            },
+        });
+        return resSend(200, users);
+    } catch (error: any) {
+        return resSend(500, error);
+    }
+};
+
+export const addInteraction = async (prisma: PrismaClient, userId: string, interactedWithId: string, decision: boolean) => {
+    try {
+        const haveInteraction = await prisma.interactions.findMany({
+            where: {
+                AND: [
+                    {
+                        interactedWithId: {
+                            equals: userId
+                        }
+                    },
+                    {
+                        madeById: {
+                            equals: interactedWithId
+                        }
+                    }
+                ]
+            }
+        });
+        const interaction = await prisma.interactions.create({
+            data: {
+                madeById: userId,
+                interactedWithId,
+                decision,
+                timestamp: new Date(),
+            }
+        });
+        return resSend(201, {
+            ...interaction,
+            match: haveInteraction.length > 0,
+        });
+    } catch (error: any) {
+        return resSend(500, error);
+    }
 };

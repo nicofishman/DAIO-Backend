@@ -139,3 +139,30 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
     );
     res.status(200).send(usersAndInfo);
 };
+
+export const notMatchedUsers = async (req: Request, res: Response) => {
+    const userId = req.get('userId');
+    if (!userId) {
+        res.status(401).send({ error: 'Missing userId' });
+        return;
+    }
+    const response: any = await service.getNotMatchedUsers(prisma, userId);
+    res.status(response.statusCode).send(response.body);
+};
+
+export const addInteraction = async (req: Request, res: Response) => {
+    const { userId, interactedWith, decision }: {
+        userId: string;
+        interactedWith: string;
+        decision: boolean;
+    } = req.body;
+
+    console.log(userId, interactedWith, decision);
+
+    if (!userId || !interactedWith || decision === undefined) {
+        res.status(401).send({ error: 'Missing userId, interactedWith or decision' });
+        return;
+    }
+    const response: any = await service.addInteraction(prisma, userId, interactedWith, decision);
+    res.status(response.statusCode).send(response.body);
+};
