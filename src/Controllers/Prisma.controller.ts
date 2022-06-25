@@ -60,7 +60,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
         res.status(response.statusCode).send(response.body);
     }
     const usersAndInfo: any = [];
-    const users = req.body || response.body;
+    const users = Object.keys(req.body).length !== 0 ? req.body : response.body;
 
     await Promise.all(
         users.map(async (user: User) => {
