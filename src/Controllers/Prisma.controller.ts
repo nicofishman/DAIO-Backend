@@ -102,8 +102,6 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
                 });
 
                 const myTrack = spotiTrack.body;
-                // const spotiArtistsGenres: string[] = spotiArtists.body.artists.map((artist: any) => artist.genres);
-                console.log(myTrack.name, spotiArtists.body.artists.map((artist: any) => artist.name).join('-'), trackGenres);
 
                 userTracks.push({
                     id: track.trackId,
