@@ -2,7 +2,7 @@ import { Artist, PrismaClient, Track, User } from '@prisma/client';
 import * as service from '../Services/Prisma.service';
 import { resSend } from '../Utils/response';
 import { Request, Response } from 'express';
-import { getArtistById, getSongById } from '../Services/Spotify.service';
+import { getArtistById, getMultipleArtistsById, getSongById } from '../Services/Spotify.service';
 
 type userDB = User & { tracks: Track[], artists: Artist[] };
 
@@ -86,17 +86,32 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
             const userTracks: any[] = [];
             await Promise.all(myUser.tracks.map(async (track: Track): Promise<void | object> => {
                 const spotiTrack: any = await getSongById(accessToken, track.trackId);
+                const spotiArtists: any = await getMultipleArtistsById(accessToken, spotiTrack.body.artists.map((artist: any) => artist.id));
                 if (spotiTrack.statusCode !== 200) {
                     return resSend(404, `Track not found: ${track.trackId}, ${spotiTrack.body}`);
                 }
 
+                const trackGenres: string[] = [];
+                spotiArtists.body.artists.forEach((artist: any) => {
+                    artist.genres.forEach((genre: string) => {
+                        if (!trackGenres.includes(genre)) {
+                            trackGenres.push(genre);
+                        }
+                    }
+                    );
+                });
+
                 const myTrack = spotiTrack.body;
+                // const spotiArtistsGenres: string[] = spotiArtists.body.artists.map((artist: any) => artist.genres);
+                console.log(myTrack.name, spotiArtists.body.artists.map((artist: any) => artist.name).join('-'), trackGenres);
+
                 userTracks.push({
                     id: track.trackId,
                     name: myTrack.name,
                     preview_url: myTrack.preview_url,
                     orden: track.orden,
                     duration: myTrack.duration_ms,
+                    genres: trackGenres,
                     album: {
                         id: myTrack.album.id,
                         name: myTrack.album.name,
