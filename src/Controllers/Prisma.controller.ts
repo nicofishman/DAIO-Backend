@@ -42,6 +42,7 @@ export const addUser = async (req: Request, res: Response) => {
 
 export const getUsersAndInfo = async (req: Request, res: Response) => {
     const accessToken = req.get('accessToken');
+    const doReturn = req.cookies.doReturn;
     if (!accessToken) {
         res.status(401).send({ error: 'Missing accessToken' });
         return;
@@ -60,7 +61,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
         res.status(response.statusCode).send(response.body);
     }
     const usersAndInfo: any = [];
-    const users = Object.keys(req.body).length !== 0 ? req.body : response.body;
+    const users = req.body.length > 0 || Object.keys(req.body).length !== 0 ? req.body : response.body;
 
     await Promise.all(
         users.map(async (user: User) => {
@@ -86,6 +87,10 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
             const userTracks: any[] = [];
             await Promise.all(myUser.tracks.map(async (track: Track): Promise<void | object> => {
                 const spotiTrack: any = await getSongById(accessToken, track.trackId);
+                if (spotiTrack.statusCode !== 200) {
+                    res.status(spotiTrack.statusCode).send(spotiTrack.body);
+                    return;
+                }
                 const spotiArtists: any = await getMultipleArtistsById(accessToken, spotiTrack.body.artists.map((artist: any) => artist.id));
                 if (spotiTrack.statusCode !== 200) {
                     return resSend(404, `Track not found: ${track.trackId}, ${spotiTrack.body}`);
@@ -150,7 +155,12 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
                     });
         })
     );
-    res.status(200).send(usersAndInfo);
+    if (doReturn) {
+        return resSend(200, usersAndInfo);
+    } else {
+        res.status(200).send(usersAndInfo);
+        return null;
+    }
 };
 
 export const notMatchedUsers = async (req: Request, res: Response) => {

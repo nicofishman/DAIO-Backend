@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import routerSpotify from './Routes/Spotify.routes';
 import routerDatabase from './Routes/Database.routes';
 import routerCredentials from './Routes/Credentials.routes';
+import matchRouter from './Routes/Match.routes';
 
 const app = express();
 app.use(express.json()); // Middleware to parse JSON
@@ -17,6 +18,7 @@ const PORT = process.env.PORT || 3000;
 app.use('/credentials', routerCredentials);
 app.use('/spotify', routerSpotify);
 app.use('/database', routerDatabase);
+app.use('/match', matchRouter);
 app.get('/', (_req, res) => {
     res.send('Hello World');
 });

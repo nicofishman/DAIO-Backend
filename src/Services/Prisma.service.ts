@@ -39,6 +39,22 @@ export const prismaAddUser = async (prisma: PrismaClient, user: User & { tracks:
     return newUser;
 };
 
+export const getUserById = async (prisma: PrismaClient, userId: string) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                spotifyId: userId,
+            }
+        });
+        if (!user) {
+            return resSend(404, { error: 'User not found' });
+        }
+        return resSend(200, user);
+    } catch (error: any) {
+        return resSend(500, error);
+    }
+};
+
 export const getUserInfo = async (prisma: PrismaClient, user: User) => {
     const userWithInfo: User & { tracks: Track[], artists: Artist[] } | null = await prisma.user.findFirst({
         where: {
