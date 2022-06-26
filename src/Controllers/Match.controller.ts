@@ -27,6 +27,8 @@ export const compareTwoUsers = async (req: Request, res: Response) => {
     req.body = [user1.body, user2.body];
     req.cookies.doReturn = true;
     const usersInfo: any = await getUsersAndInfo(req, res);
+
     const response: any = matchService.compare(usersInfo.body[0], usersInfo.body[1]);
+
     res.status(response.statusCode).send(response.body);
 };
