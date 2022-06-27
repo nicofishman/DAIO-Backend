@@ -160,15 +160,19 @@ export const getMultipleArtistsById = async (accessToken: string, query: string)
     spotifyApi.resetAccessToken();
     spotifyApi.setAccessToken(accessToken);
     let returnValue = {};
-    await spotifyApi
-        .getArtists(query)
-        .then((data: any) => {
-            returnValue = resSend(200, data.body);
-        })
-        .catch((err: any) => {
-            returnValue = resSend(err.statusCode, err);
-        });
-    return returnValue;
+    try {
+        await spotifyApi
+            .getArtists(query)
+            .then((data: any) => {
+                returnValue = resSend(200, data.body);
+            })
+            .catch((err: any) => {
+                returnValue = resSend(err.statusCode, err);
+            });
+        return resSend(200, returnValue);
+    } catch (error) {
+        return resSend(500, { error });
+    }
 };
 
 export const userTopArtists = async (accessToken: string) => {

@@ -14,9 +14,9 @@ const VALORES = {
     -B: Si los usuarios comparten cancion -> 14
     -----------A*3 + B*5 = 100--------------
     -C: Si los usuarios comparten album de cancion -> 5
-    -D: Si los usuarios comparten artista de cancion ->
+    -D: Si los usuarios comparten artista de cancion -> 3
     ----------------------------------------
-    -E: Si el artista de una canción de un usuario es el artista general del otro ->
+    -E: Si el artista de una canción de un usuario es el artista general del otro -> 5
 
     -F: Porcentaje de géneros que coinciden entre los usuarios
 */
@@ -32,11 +32,16 @@ const checkIntersections = (user1: string[], user2: string[]) => {
 };
 
 const checkArtistInSongWithArtist = (user1: FullUser, user2: FullUser) => {
-    const user1SongArtists: string[][] = user1.canciones.map(x => x.artists.map(y => y.id));
-    const user1Artists: string[] = user1SongArtists.flat();
+    const user1SongArtistsFull = user1.canciones.map(x => x.artists.map(y => y.id));
+    const user1SongArtists = user1SongArtistsFull.flat();
     const user2Artists = user2.artistas.map(x => x.id);
-    const intersection = checkIntersections(user1Artists, user2Artists);
-    return intersection.length;
+    const intersection = checkIntersections(user1SongArtists, user2Artists);
+
+    const user2SongArtistsFull = user2.canciones.map(x => x.artists.map(y => y.id));
+    const user2SongArtists = user2SongArtistsFull.flat();
+    const user1Artists = user1.artistas.map(x => x.id);
+    const intersection2 = checkIntersections(user2SongArtists, user1Artists);
+    return [intersection, intersection2];
 };
 
 const checkSameArtist = (user1: FullUser, user2: FullUser, user1Registro: Registro, user2Registro: Registro) => {
@@ -100,34 +105,42 @@ export const compare = (user1: FullUser, user2: FullUser) => {
         canciones: [],
     };
 
-    const user1ArtistsId = user1.artistas.map((artist: Artista) => artist.id);
-    const user2ArtistsId = user2.artistas.map((artist: Artista) => artist.id);
+    try {
+        // Si los usuarios comparten artista -> 10 pts
+        const user1ArtistsId = user1.artistas.map((artist: Artista) => artist.id);
+        const user2ArtistsId = user2.artistas.map((artist: Artista) => artist.id);
+        const ruleA = checkIntersections(user1ArtistsId, user2ArtistsId);
+        user1Registro.artistas.push(...ruleA);
+        user2Registro.artistas.push(...ruleA);
+        porcentajeDeCompatibilidad += ruleA.length * VALORES.shareArtist;
 
-    const ruleA = checkIntersections(user1ArtistsId, user2ArtistsId);
-    user1Registro.artistas.push(...ruleA);
-    user2Registro.artistas.push(...ruleA);
-    porcentajeDeCompatibilidad += ruleA.length * VALORES.shareArtist;
+        // Si los usuarios comparten cancion -> 14 pts
+        const user1TracksId = user1.canciones.map((track: Cancione) => track.id);
+        const user2TracksId = user2.canciones.map((track: Cancione) => track.id);
+        const ruleB = checkIntersections(user1TracksId, user2TracksId);
+        user1Registro.canciones.push(...ruleB);
+        user2Registro.canciones.push(...ruleB);
+        porcentajeDeCompatibilidad += ruleB.length * VALORES.shareTrack;
 
-    const user1TracksId = user1.canciones.map((track: Cancione) => track.id);
-    const user2TracksId = user2.canciones.map((track: Cancione) => track.id);
+        // Si los usuarios comparten album de cancion -> 5 pts
+        const [user1C, user2C] = checkSameAlbum(user1, user2, user1Registro, user2Registro);
+        user1Registro.canciones.push(...user1C.map(x => x.id));
+        user2Registro.canciones.push(...user2C.map(x => x.id));
+        porcentajeDeCompatibilidad += user1C.length * VALORES.shareTrackAlbum;
 
-    const ruleB = checkIntersections(user1TracksId, user2TracksId);
-    user1Registro.canciones.push(...ruleB);
-    user2Registro.canciones.push(...ruleB);
-    porcentajeDeCompatibilidad += ruleB.length * VALORES.shareTrack;
+        // Si los usuarios comparten artista de cancion -> 3 pts
+        const [user1D, user2D] = checkSameArtist(user1, user2, user1Registro, user2Registro);
+        user1Registro.canciones.push(...user1D.map(x => x.songId));
+        user2Registro.canciones.push(...user2D.map(x => x.songId));
+        porcentajeDeCompatibilidad += user1D.length * VALORES.shareTrackArtist;
 
-    const [user1C, user2C] = checkSameAlbum(user1, user2, user1Registro, user2Registro);
-    user1Registro.canciones.push(...user1C.map(x => x.id));
-    user2Registro.canciones.push(...user2C.map(x => x.id));
-    porcentajeDeCompatibilidad += user1C.length * VALORES.trackArtistShareArtist;
+        // Si el artista de una canción de un usuario es el artista general del otro -> 5 pts
+        const [user1E, user2E] = checkArtistInSongWithArtist(user1, user2);
+        const ruleE = user1E.concat(user2E);
+        porcentajeDeCompatibilidad += ruleE.length * VALORES.trackArtistShareArtist;
 
-    const [user1D, user2D] = checkSameArtist(user1, user2, user1Registro, user2Registro);
-    user1Registro.canciones.push(...user1D.map(x => x.songId));
-    user2Registro.canciones.push(...user2D.map(x => x.songId));
-    porcentajeDeCompatibilidad += user1D.length * VALORES.trackArtistShareArtist;
-
-    const ruleE = checkArtistInSongWithArtist(user1, user2);
-    console.log(ruleE);
-
-    return resSend(200, { porcentajeDeCompatibilidad });
+        return resSend(200, { porcentajeDeCompatibilidad });
+    } catch (error: any) {
+        return resSend(500, { error });
+    }
 };

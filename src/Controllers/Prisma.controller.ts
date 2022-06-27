@@ -92,6 +92,10 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
                     return;
                 }
                 const spotiArtists: any = await getMultipleArtistsById(accessToken, spotiTrack.body.artists.map((artist: any) => artist.id));
+                if (spotiArtists.statusCode !== 200) {
+                    res.status(spotiArtists.statusCode).send(spotiArtists.body);
+                    return;
+                }
                 if (spotiTrack.statusCode !== 200) {
                     return resSend(404, `Track not found: ${track.trackId}, ${spotiTrack.body}`);
                 }
