@@ -169,7 +169,7 @@ export const getMultipleArtistsById = async (accessToken: string, query: string)
             .catch((err: any) => {
                 returnValue = resSend(err.statusCode, err);
             });
-        return resSend(200, returnValue);
+        return returnValue;
     } catch (error) {
         return resSend(500, { error });
     }

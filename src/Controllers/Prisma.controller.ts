@@ -89,17 +89,20 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
             await Promise.all(myUser.tracks.map(async (track: Track): Promise<void | object> => {
                 const spotiTrack: any = await getSongById(accessToken, track.trackId);
                 if (spotiTrack.statusCode !== 200) {
-                    res.status(spotiTrack.statusCode).send(spotiTrack.body);
-                    return;
+                    throw spotiTrack;
+                    // res.status(spotiTrack.statusCode).send(spotiTrack.body);
+                    // return;
                 }
                 const spotiArtists: any = await getMultipleArtistsById(accessToken, spotiTrack.body.artists.map((artist: any) => artist.id));
                 if (spotiArtists.statusCode !== 200) {
-                    res.status(spotiArtists.statusCode).send(spotiArtists.body);
-                    return;
+                    throw spotiArtists;
+                    // res.status(spotiArtists.statusCode).send(spotiArtists.body);
+                    // return;
                 }
                 if (spotiTrack.statusCode !== 200) {
-                    res.status(404).send(`Track not found: ${track.trackId}, ${spotiTrack.body}`);
-                    return;
+                    throw spotiTrack;
+                    // res.status(404).send(`Track not found: ${track.trackId}, ${spotiTrack.body}`);
+                    // return;
                 }
 
                 const trackGenres: string[] = [];
@@ -135,7 +138,10 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
                         };
                     }),
                 });
-            }));
+            }))
+                .catch((error) => {
+                    throw error;
+                });
 
             const userArtists: any[] = [];
             await Promise.all(myUser.artists.map(async (artist: Artist) => {
@@ -148,7 +154,10 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
                     genres: myArtist.genres,
                     orden: artist.orden,
                 });
-            }));
+            }))
+                .catch((error) => {
+                    throw error;
+                });
 
             userTracks.sort((a, b) => a.orden - b.orden);
             userArtists.sort((a, b) => a.orden - b.orden);
@@ -160,13 +169,18 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
                         artistas: userArtists
                     });
         })
-    );
-    if (doReturn) {
-        return resSend(200, usersAndInfo);
-    } else {
-        res.status(200).send(usersAndInfo);
-        return null;
-    }
+    )
+        .then(() => {
+            if (doReturn) {
+                return resSend(200, usersAndInfo);
+            } else {
+                res.status(200).send(usersAndInfo);
+                return null;
+            }
+        })
+        .catch((error: any) => {
+            res.status(error.statusCode).send(error.body);
+        });
 };
 
 export const notMatchedUsers = async (req: Request, res: Response) => {
