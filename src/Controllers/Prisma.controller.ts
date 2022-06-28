@@ -82,6 +82,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
 
             if (userInfo.statusCode !== 200) {
                 res.status(userInfo.statusCode).send(userInfo.body);
+                return;
             }
             const myUser: userDB = userInfo.body;
             const userTracks: any[] = [];
@@ -97,7 +98,8 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
                     return;
                 }
                 if (spotiTrack.statusCode !== 200) {
-                    return resSend(404, `Track not found: ${track.trackId}, ${spotiTrack.body}`);
+                    res.status(404).send(`Track not found: ${track.trackId}, ${spotiTrack.body}`);
+                    return;
                 }
 
                 const trackGenres: string[] = [];
