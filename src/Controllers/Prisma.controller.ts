@@ -189,7 +189,7 @@ export const notMatchedUsers = async (req: Request, res: Response) => {
         return;
     }
     const response: any = await service.getNotMatchedUsers(prisma, req, res, userId);
-    res.status(response.statusCode).send(response.body);
+    res.status(response.statusCode).send(response.body.body);
 };
 
 export const addInteraction = async (req: Request, res: Response) => {

@@ -106,6 +106,7 @@ export const getNotMatchedUsers = async (prisma: PrismaClient, req: Request, res
             },
         });
         req.body = users;
+        req.cookies.doReturn = 'true';
         const usersWithInfo: any = await getUsersAndInfo(req, res);
         return resSend(200, usersWithInfo);
     } catch (error: any) {
