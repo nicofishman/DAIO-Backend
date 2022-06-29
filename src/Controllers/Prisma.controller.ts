@@ -62,8 +62,11 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
         res.status(response.statusCode).send(response.body);
     }
     const usersAndInfo: any = [];
-    const users = req.body.length > 0 || Object.keys(req.body).length !== 0 ? req.body : response.body;
+    const users = /* req.body.length > 0 || */ Object.keys(req.body).length !== 0 ? req.body : response.body;
 
+    if (req.body.length === 0) {
+        return resSend(200, req.body);
+    }
     const prom = await Promise.all(users.map(async (user: User) => {
         // #region Get user info
         const userInfo: any = await service.getUserInfo(prisma, user)

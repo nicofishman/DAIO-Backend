@@ -59,6 +59,7 @@ export const getUsersFromUser = async (req: Request, res: Response) => {
     req.cookies.doReturn = 'true';
     const myUserInfo: any = await getUsersAndInfo(req, res);
     const miUsuario = myUserInfo.body[0];
+
     const { body: notMatchedUsers, statusCode }: any = await prismaService.getNotMatchedUsers(prisma, req, res, userId);
 
     if (statusCode !== 200) {
