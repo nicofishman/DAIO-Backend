@@ -37,6 +37,7 @@
         "@types/mysql": "^2.15.21",
         "@types/pg": "^8.6.5",
         "@types/spotify-web-api-node": "^5.0.7",
+        "@types/string-similarity": "^4.0.0",
         "@typescript-eslint/eslint-plugin": "^5.21.0",
         "@typescript-eslint/parser": "^5.21.0",
         "eslint": "^8.14.0",
