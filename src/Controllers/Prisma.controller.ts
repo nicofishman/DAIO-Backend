@@ -174,7 +174,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
             return resSend(error.statusCode, error.body);
         });
     if (doReturn === 'true') {
-        // res.cookie('doReturn', 'false');
+        res.cookie('doReturn', 'false');
         return prom;
     } else {
         res.status(prom.statusCode).send(prom.body);
