@@ -1,5 +1,6 @@
 import { Artista, Cancione, FullUser } from '../Utils/fullUser';
 import { resSend } from '../Utils/response';
+import stringSimilarity from 'string-similarity';
 
 const VALORES = {
     shareArtist: 10,
@@ -7,6 +8,7 @@ const VALORES = {
     shareTrackAlbum: 5,
     shareTrackArtist: 3,
     trackArtistShareArtist: 5,
+    genresSimilarity: 1
 };
 
 /* TODO:
@@ -92,6 +94,27 @@ const checkSameAlbum = (user1: FullUser, user2: FullUser, user1Registro: Registr
     return [user1Intersection, user2Intersection];
 };
 
+function checkGenresSimilarity(user1: FullUser, user2: FullUser, user1Registro: Registro, user2Registro: Registro) {
+    const songsNotInRegistro1 = user1.canciones.filter(x => !(user1Registro.canciones.includes(x.id)));
+    const songsNotInRegistro2 = user2.canciones.filter(x => !(user2Registro.canciones.includes(x.id)));
+    const genres1 = songsNotInRegistro1.map(x => x.genres).flat();
+    const genres2 = songsNotInRegistro2.map(x => x.genres).flat();
+    let totalSim = 0;
+
+    genres1.forEach(gen1 => {
+        let similarity = 0;
+        let count = 0;
+        genres2.forEach(gen2 => {
+            const sim = stringSimilarity.compareTwoStrings(gen1, gen2);
+            similarity += sim;
+            count++;
+            // console.log(gen1, gen2, sim);
+        });
+        totalSim += similarity / count;
+    });
+    return totalSim;
+}
+
 export const compare = (user1: FullUser, user2: FullUser) => {
     let porcentajeDeCompatibilidad = 0;
 
@@ -138,6 +161,10 @@ export const compare = (user1: FullUser, user2: FullUser) => {
         const [user1E, user2E] = checkArtistInSongWithArtist(user1, user2);
         const ruleE = user1E.concat(user2E);
         porcentajeDeCompatibilidad += ruleE.length * VALORES.trackArtistShareArtist;
+
+        let ruleF = checkGenresSimilarity(user1, user2, user1Registro, user2Registro);
+        ruleF = Math.round(ruleF * 100) / 100;
+        porcentajeDeCompatibilidad += ruleF * VALORES.genresSimilarity;
 
         return resSend(200, { porcentajeDeCompatibilidad });
     } catch (error: any) {

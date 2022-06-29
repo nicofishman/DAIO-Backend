@@ -43,6 +43,7 @@ export const addUser = async (req: Request, res: Response) => {
 export const getUsersAndInfo = async (req: Request, res: Response) => {
     const accessToken = req.get('accessToken');
     const doReturn = req.cookies.doReturn;
+
     if (!accessToken) {
         res.status(401).send({ error: 'Missing accessToken' });
         return;
@@ -63,7 +64,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
     const usersAndInfo: any = [];
     const users = req.body.length > 0 || Object.keys(req.body).length !== 0 ? req.body : response.body;
 
-    await Promise.all(users.map(async (user: User) => {
+    const prom = await Promise.all(users.map(async (user: User) => {
         // #region Get user info
         const userInfo: any = await service.getUserInfo(prisma, user)
             .then((userInfo) => {
@@ -167,16 +168,18 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
     })
     )
         .then(() => {
-            if (doReturn) {
-                return resSend(200, usersAndInfo);
-            } else {
-                res.status(200).send(usersAndInfo);
-                return null;
-            }
+            return resSend(200, usersAndInfo);
         })
         .catch((error: any) => {
-            res.status(error.statusCode).send(error.body);
+            return resSend(error.statusCode, error.body);
         });
+    if (doReturn === 'true') {
+        // res.cookie('doReturn', 'false');
+        return prom;
+    } else {
+        res.status(prom.statusCode).send(prom.body);
+        return null;
+    }
 };
 
 export const notMatchedUsers = async (req: Request, res: Response) => {
