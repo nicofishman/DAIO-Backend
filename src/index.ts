@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { NextFunction, Response, Request } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
@@ -12,6 +12,16 @@ app.use(express.json()); // Middleware to parse JSON
 app.use(cors()); // Middleware to enable CORS
 app.use(cookieParser()); // Middleware to enable cookies
 app.use(bodyParser.json()); // Middleware to enable cookies
+// #region time middleware
+app.use((req: Request, res: Response, next: NextFunction) => { // Middleware to take time of request
+    const start = new Date().getTime();
+    next();
+    res.on('finish', () => {
+        const end = new Date().getTime();
+        console.log(`${req.method} ${req.originalUrl} took ${end - start} ms`);
+    });
+});
+// #endregion
 
 const PORT = process.env.PORT || 3000;
 

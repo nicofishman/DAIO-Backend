@@ -63,112 +63,108 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
     const usersAndInfo: any = [];
     const users = req.body.length > 0 || Object.keys(req.body).length !== 0 ? req.body : response.body;
 
-    await Promise.all(
-        users.map(async (user: User) => {
-            const userInfo: any = await service.getUserInfo(prisma, user)
-                .then((userInfo) => {
-                    if (!userInfo) {
-                        console.log('User not found');
-                        return resSend(404, 'User not found');
-                    }
-                    return resSend(200, userInfo);
-                })
-                .catch((error) => {
-                    Promise.reject(resSend(500, error));
-                })
-                .finally(async () => {
-                    await prisma.$disconnect();
-                });
+    await Promise.all(users.map(async (user: User) => {
+        // #region Get user info
+        const userInfo: any = await service.getUserInfo(prisma, user)
+            .then((userInfo) => {
+                if (!userInfo) {
+                    return resSend(404, 'User not found');
+                }
+                return resSend(200, userInfo);
+            })
+            .catch((error) => {
+                throw (resSend(500, error));
+            })
+            .finally(async () => {
+                await prisma.$disconnect();
+            });
 
-            if (userInfo.statusCode !== 200) {
-                res.status(userInfo.statusCode).send(userInfo.body);
-                return;
+        if (userInfo.statusCode !== 200) {
+            res.status(userInfo.statusCode).send(userInfo.body);
+            return;
+        }
+        // #endregion
+        const myUser: userDB = userInfo.body;
+        const userTracks: any[] = [];
+        await Promise.all(myUser.tracks.map(async (track: Track): Promise<void | object> => {
+            const spotiTrack: any = await getSongById(accessToken, track.trackId);
+            if (spotiTrack.statusCode !== 200) {
+                throw spotiTrack;
             }
-            const myUser: userDB = userInfo.body;
-            const userTracks: any[] = [];
-            await Promise.all(myUser.tracks.map(async (track: Track): Promise<void | object> => {
-                const spotiTrack: any = await getSongById(accessToken, track.trackId);
-                if (spotiTrack.statusCode !== 200) {
-                    throw spotiTrack;
-                    // res.status(spotiTrack.statusCode).send(spotiTrack.body);
-                    // return;
-                }
-                const spotiArtists: any = await getMultipleArtistsById(accessToken, spotiTrack.body.artists.map((artist: any) => artist.id));
-                if (spotiArtists.statusCode !== 200) {
-                    throw spotiArtists;
-                    // res.status(spotiArtists.statusCode).send(spotiArtists.body);
-                    // return;
-                }
-                if (spotiTrack.statusCode !== 200) {
-                    throw spotiTrack;
-                    // res.status(404).send(`Track not found: ${track.trackId}, ${spotiTrack.body}`);
-                    // return;
-                }
+            const spotiArtists: any = await getMultipleArtistsById(accessToken, spotiTrack.body.artists.map((artist: any) => artist.id));
+            if (spotiArtists.statusCode !== 200) {
+                throw spotiArtists;
+            }
 
-                const trackGenres: string[] = [];
-                spotiArtists.body.artists.forEach((artist: any) => {
-                    artist.genres.forEach((genre: string) => {
-                        if (!trackGenres.includes(genre)) {
-                            trackGenres.push(genre);
-                        }
+            const trackGenres: string[] = [];
+            spotiArtists.body.artists.forEach((artist: any) => {
+                artist.genres.forEach((genre: string) => {
+                    if (!trackGenres.includes(genre)) {
+                        trackGenres.push(genre);
                     }
-                    );
-                });
+                }
+                );
+            });
 
-                const myTrack = spotiTrack.body;
+            const myTrack = spotiTrack.body;
 
-                userTracks.push({
-                    id: track.trackId,
-                    name: myTrack.name,
-                    preview_url: myTrack.preview_url,
-                    orden: track.orden,
-                    duration: myTrack.duration_ms,
-                    genres: trackGenres,
-                    album: {
-                        id: myTrack.album.id,
-                        name: myTrack.album.name,
-                        img: myTrack.album.images[0].url,
-                    },
-                    artists: myTrack.artists.map((artist: any) => {
-                        return {
-                            id: artist.id,
-                            name: artist.name,
-                            images: artist.images,
-                            genres: artist.genres,
-                        };
-                    }),
-                });
-            }))
-                .catch((error) => {
-                    throw error;
-                });
+            userTracks.push({
+                id: track.trackId,
+                name: myTrack.name,
+                preview_url: myTrack.preview_url,
+                orden: track.orden,
+                duration: myTrack.duration_ms,
+                genres: trackGenres,
+                album: {
+                    id: myTrack.album.id,
+                    name: myTrack.album.name,
+                    img: myTrack.album.images[0].url,
+                },
+                artists: myTrack.artists.map((artist: any) => {
+                    return {
+                        id: artist.id,
+                        name: artist.name,
+                        images: artist.images,
+                        genres: artist.genres,
+                    };
+                }),
+            });
+        }))
+            .catch(async (error) => {
+                throw error;
+            });
 
-            const userArtists: any[] = [];
-            await Promise.all(myUser.artists.map(async (artist: Artist) => {
-                const spotiArtist: any = await getArtistById(accessToken, artist.artistId);
-                const myArtist = spotiArtist.body;
-                userArtists.push({
-                    id: artist.artistId,
-                    name: myArtist.name,
-                    images: myArtist.images,
-                    genres: myArtist.genres,
-                    orden: artist.orden,
-                });
-            }))
-                .catch((error) => {
-                    throw error;
-                });
+        const userArtists: any[] = [];
+        await Promise.all(myUser.artists.map(async (artist: Artist) => {
+            const spotiArtist: any = await getArtistById(accessToken, artist.artistId);
 
-            userTracks.sort((a, b) => a.orden - b.orden);
-            userArtists.sort((a, b) => a.orden - b.orden);
-            userInfo.statusCode === 200 &&
-                usersAndInfo.push(
-                    {
-                        ...user,
-                        canciones: userTracks,
-                        artistas: userArtists
-                    });
-        })
+            if (spotiArtist.statusCode !== 200) {
+                throw spotiArtist;
+            }
+
+            const myArtist = spotiArtist.body;
+            userArtists.push({
+                id: artist.artistId,
+                name: myArtist.name,
+                images: myArtist.images,
+                genres: myArtist.genres,
+                orden: artist.orden,
+            });
+        }))
+            .catch((error) => {
+                throw error;
+            });
+
+        userTracks.sort((a, b) => a.orden - b.orden);
+        userArtists.sort((a, b) => a.orden - b.orden);
+        userInfo.statusCode === 200 &&
+            usersAndInfo.push(
+                {
+                    ...user,
+                    canciones: userTracks,
+                    artistas: userArtists
+                });
+    })
     )
         .then(() => {
             if (doReturn) {
@@ -199,8 +195,6 @@ export const addInteraction = async (req: Request, res: Response) => {
         interactedWith: string;
         decision: boolean;
     } = req.body;
-
-    console.log(userId, interactedWith, decision);
 
     if (!userId || !interactedWith || decision === undefined) {
         res.status(401).send({ error: 'Missing userId, interactedWith or decision' });
