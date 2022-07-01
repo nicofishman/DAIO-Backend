@@ -66,10 +66,15 @@ export const getUsersFromUser = async (req: Request, res: Response) => {
         res.status(notMatchedUsers.statusCode).send(notMatchedUsers.body);
         return;
     }
+    if (notMatchedUsers.statusCode !== 200) {
+        res.status(notMatchedUsers.statusCode).send(notMatchedUsers.body);
+        return;
+    }
     if (Array.isArray(notMatchedUsers.body) && notMatchedUsers.body.length === 0) {
         res.status(204).send({});
         return;
     }
+
     if (!Array.isArray(notMatchedUsers.body)) {
         res.status(500).send({ error: 'Error getting not matched users' });
         return;

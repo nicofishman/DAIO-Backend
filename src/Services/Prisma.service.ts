@@ -105,7 +105,7 @@ export const getNotMatchedUsers = async (prisma: PrismaClient, req: Request, res
                 artists: true,
             },
         });
-        console.log(users);
+        // console.log(users);
 
         req.body = users;
         req.cookies.doReturn = 'true';
