@@ -210,7 +210,6 @@ export const userTopTracks = async (accessToken: string) => {
         async function (data: any) {
             await Promise.all(data.body.items.map(async (track: any) => {
                 const genres: any = await getGenreByArtists(accessToken, track.artists.map((artist: any) => artist.id));
-                console.log('genres', genres);
 
                 if (genres.statusCode !== 200) {
                     returnValue = resSend(genres.statusCode, genres.body);
