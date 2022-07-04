@@ -189,6 +189,7 @@ export const userTopArtists = async (accessToken: string) => {
                     id: artist.id,
                     name: artist.name,
                     img: artist.images[0].url,
+                    genres: artist.genres,
                 });
             });
             returnValue = resSend(200, topArtists);
@@ -213,6 +214,11 @@ export const userTopTracks = async (accessToken: string) => {
                     name: track.name,
                     img: track.album.images[0].url,
                     artists: track.artists.map((artist: any) => artist.name),
+                    preview_url: track.preview_url,
+                    duration: track.duration_ms,
+                    albumId: track.album.id,
+                    albumName: track.album.name,
+                    albumImage: track.album.images[0].url,
                 });
             });
             returnValue = resSend(200, topTracks);
