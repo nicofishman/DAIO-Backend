@@ -209,23 +209,25 @@ export const userTopTracks = async (accessToken: string) => {
     await spotifyApi.getMyTopTracks({ limit: 50 }).then(
         async function (data: any) {
             await Promise.all(data.body.items.map(async (track: any) => {
-                const genres: any = await getGenreByArtists(accessToken, track.artists.map((artist: any) => artist.id));
-
-                if (genres.statusCode !== 200) {
-                    returnValue = resSend(genres.statusCode, genres.body);
+                const songArtists: any = await getMultipleArtistsById(accessToken, track.artists.map((art: any) => art.id));
+                if (songArtists.statusCode !== 200) {
+                    returnValue = resSend(songArtists.statusCode, songArtists.body);
                     return;
                 }
+
+                const genres: string[] = songArtists.body.artists.map((artist: any) => artist.genres).flat();
+
                 topTracks.push({
                     id: track.id,
                     name: track.name,
                     img: track.album.images[0].url,
-                    artists: track.artists.map((artist: any) => artist.name),
+                    artists: songArtists.body.artists,
                     preview_url: track.preview_url,
                     duration: track.duration_ms,
                     albumId: track.album.id,
                     albumName: track.album.name,
                     albumImage: track.album.images[0].url,
-                    genres: genres.body,
+                    genres,
                 });
             }));
             returnValue = resSend(200, topTracks);
