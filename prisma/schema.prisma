@@ -7,11 +7,37 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+model Artista {
+    id     String   @id
+    name   String
+    image  String
+    genres String[]
+
+    Artist Artist[]
+    @@map("artistas")
+}
+
+model Cancion {
+    id          String   @id
+    name        String
+    preview_url String
+    duration    Int
+    genres      String[]
+    albumId     String
+    albumName   String
+    albumImage  String
+    artistsId   String[]
+
+    Track Track[]
+    @@map("canciones")
+}
+
 model Artist {
     artistId String
     fkUser   String
-    user     User?  @relation(fields: [fkUser], references: [spotifyId], onDelete: Cascade)
     orden    Int
+    user     User     @relation(fields: [fkUser], references: [spotifyId], onDelete: Cascade)
+    artista  Artista? @relation(fields: [artistId], references: [id])
 
     @@id([artistId, fkUser, orden])
     @@map("artistxuser")
@@ -30,8 +56,9 @@ model interactions {
 model Track {
     trackId String
     fkUser  String
-    user    User?  @relation(fields: [fkUser], references: [spotifyId], onDelete: Cascade)
     orden   Int
+    user    User     @relation(fields: [fkUser], references: [spotifyId], onDelete: Cascade)
+    track   Cancion? @relation(fields: [trackId], references: [id], onDelete: Cascade)
 
     @@id([trackId, fkUser, orden])
     @@map("trackxuser")
@@ -42,8 +69,8 @@ model User {
     username    String
     description String
     avatarId    Decimal  @db.Decimal
-    tracks      Track[]
     artists     Artist[]
+    tracks      Track[]
 
     @@map("users")
 }

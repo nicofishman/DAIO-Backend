@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { writeFileSync } from 'fs';
 import * as service from '../Services/Spotify.service';
 
 export const getByArtistName = async (req: Request, res: Response) => {
@@ -111,4 +112,10 @@ export const getArtistById = async (req: Request, res: Response) => {
     }
     const response: any = await service.getArtistById(accessToken, req.params.id);
     res.status(response.statusCode).send(response.body);
+};
+
+export const nashe = async (req: Request, _res: Response) => {
+    // LOG into txt
+    console.log('nashe');
+    writeFileSync('log.json', JSON.stringify(req.body));
 };

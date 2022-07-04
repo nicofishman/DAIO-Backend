@@ -1,21 +1,84 @@
-import { Artist, interactions, PrismaClient, Track, User } from '@prisma/client';
+import { Artist, Artista, Cancion, interactions, PrismaClient, Track, User } from '@prisma/client';
 import { Response, Request } from 'express';
 import { getUsersAndInfo } from '../Controllers/Prisma.controller';
 import { resSend } from '../Utils/response';
+
+const addTracksAndSongs = async (prisma: PrismaClient, tracks: (Cancion & { artists: Artista[] })[], artists: Artista[]) => {
+    const tracksDb = await prisma.cancion.findMany({
+        select: {
+            id: true,
+        },
+    });
+    const tracksIds = tracksDb.map((track) => track.id);
+    const artistsInDb = await prisma.artista.findMany({
+        select: {
+            id: true,
+        },
+    });
+    const artistsIds = artistsInDb.map((artist) => artist.id);
+
+    tracks.forEach(async (track) => {
+        if (tracksIds.includes(track.id)) {
+            return;
+        }
+        await prisma.cancion.create({
+            data: {
+                id: track.id,
+                name: track.name,
+                albumImage: track.albumImage,
+                albumName: track.albumName,
+                albumId: track.albumId,
+                preview_url: track.preview_url,
+                duration: track.duration,
+                genres: track.genres,
+                artistsId: track.artists.map((artist) => artist.id),
+            },
+        });
+        track.artists.forEach(async (artist: any) => {
+            if (artistsIds.includes(artist.id)) {
+                return;
+            }
+            await prisma.artista.create({
+                data: {
+                    id: artist.id,
+                    name: artist.name,
+                    image: artist.images[0].url,
+                    genres: artist.genres,
+                },
+            });
+        });
+    });
+
+    artists.forEach(async (artist: Artista) => {
+        if (artistsIds.includes(artist.id)) {
+            return;
+        }
+        await prisma.artista.create({
+            data: {
+                id: artist.id,
+                name: artist.name,
+                genres: artist.genres,
+                image: artist.image,
+            }
+        });
+    });
+};
 
 export const prismaGetUsers = async (prisma: PrismaClient) => {
     const users = await prisma.user.findMany();
     return users;
 };
 
-export const prismaAddUser = async (prisma: PrismaClient, user: User & { tracks: Track[], artists: Artist[] }) => {
-    const tracksData: Omit<Track, 'fkUser'>[] = user.tracks.map((track: Track, index: number) => ({
-        trackId: track.trackId,
+export const prismaAddUser = async (prisma: PrismaClient, user: User & { tracks: (Cancion & { artists: Artista[] })[], artists: Artista[] }) => {
+    await addTracksAndSongs(prisma, user.tracks, user.artists);
+
+    const tracksData: Omit<Track, 'fkUser'>[] = user.tracks.map((track, index: number) => ({
+        trackId: track.id,
         orden: index + 1,
     }));
 
-    const artistsData: Omit<Artist, 'fkUser'>[] = user.artists.map((artist: Artist, index: number) => ({
-        artistId: artist.artistId,
+    const artistsData: Omit<Artist, 'fkUser' | 'cancionId'>[] = user.artists.map((artist, index: number) => ({
+        artistId: artist.id,
         orden: index + 1,
     }));
     const newUser = await prisma.user.create({

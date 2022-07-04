@@ -188,7 +188,7 @@ export const userTopArtists = async (accessToken: string) => {
                 topArtists.push({
                     id: artist.id,
                     name: artist.name,
-                    img: artist.images[0].url,
+                    image: artist.images[0].url,
                     genres: artist.genres,
                 });
             });

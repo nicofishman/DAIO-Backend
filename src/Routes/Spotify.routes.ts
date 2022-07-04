@@ -10,7 +10,8 @@ import {
     getByAlbum,
     getBySong,
     getSongById,
-    getArtistById
+    getArtistById,
+    nashe
 } from '../Controllers/Spotify.controller';
 
 const routerSpotify = Router();
@@ -26,5 +27,6 @@ routerSpotify.get('/topartists', userTopArtists);
 routerSpotify.get('/toptracks', userTopTracks);
 routerSpotify.get('/token', getAccessToken);
 routerSpotify.get('/me', me);
+routerSpotify.post('/nashe', nashe);
 
 export default routerSpotify;
