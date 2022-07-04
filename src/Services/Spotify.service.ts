@@ -207,8 +207,15 @@ export const userTopTracks = async (accessToken: string) => {
     spotifyApi.resetAccessToken();
     spotifyApi.setAccessToken(accessToken);
     await spotifyApi.getMyTopTracks({ limit: 50 }).then(
-        function (data: any) {
-            data.body.items.forEach((track: any) => {
+        async function (data: any) {
+            await Promise.all(data.body.items.map(async (track: any) => {
+                const genres: any = await getGenreByArtists(accessToken, track.artists.map((artist: any) => artist.id));
+                console.log('genres', genres);
+
+                if (genres.statusCode !== 200) {
+                    returnValue = resSend(genres.statusCode, genres.body);
+                    return;
+                }
                 topTracks.push({
                     id: track.id,
                     name: track.name,
@@ -219,8 +226,9 @@ export const userTopTracks = async (accessToken: string) => {
                     albumId: track.album.id,
                     albumName: track.album.name,
                     albumImage: track.album.images[0].url,
+                    genres: genres.body,
                 });
-            });
+            }));
             returnValue = resSend(200, topTracks);
         },
         function (err: any) {
@@ -237,6 +245,21 @@ export const me = async (accessToken: string) => {
     await spotifyApi.getMe().then(
         function (data: any) {
             returnValue = resSend(200, data.body);
+        },
+        function (err: any) {
+            returnValue = resSend(err.statusCode, err);
+        }
+    );
+    return returnValue;
+};
+
+export const getGenreByArtists = async (accessToken: string, query: string[]) => {
+    let returnValue = {};
+    spotifyApi.resetAccessToken();
+    spotifyApi.setAccessToken(accessToken);
+    await spotifyApi.getArtists(query).then(
+        function (data: any) {
+            returnValue = resSend(200, data.body.artists[0].genres);
         },
         function (err: any) {
             returnValue = resSend(err.statusCode, err);
