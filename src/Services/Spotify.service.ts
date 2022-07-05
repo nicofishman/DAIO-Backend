@@ -100,12 +100,12 @@ export const getByArtistName = async (accessToken: string, query: string, res: R
     spotifyApi.setAccessToken(accessToken);
     res.clearCookie('redirect');
     await spotifyApi
-        .searchArtists(query)
+        .searchArtists(query, { limit: 5 })
         .then((data: any) => {
-            returnValue = data;
+            returnValue = resSend(200, data.body.artists.items);
         })
         .catch((err: any) => {
-            returnValue = err;
+            returnValue = resSend(500, { err });
         });
 
     return returnValue;
