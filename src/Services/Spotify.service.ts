@@ -184,8 +184,9 @@ export const getSongById = async (accessToken: string, query: string) => {
                 returnValue = resSend(songArtists.statusCode, songArtists.body);
                 return;
             }
-
             const genres: string[] = songArtists.body.artists.map((artist: any) => artist.genres).flat();
+
+            track.artists = songArtists.body.artists;
 
             const song = {
                 ...track,
@@ -215,6 +216,8 @@ export const getBySong = async (accessToken: string, query: any) => {
                 }
 
                 const genres: string[] = songArtists.body.artists.map((artist: any) => artist.genres).flat();
+
+                track.artists = songArtists.body.artists;
 
                 searched.push({
                     ...track,
