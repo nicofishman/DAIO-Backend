@@ -17,24 +17,11 @@ const addTracksAndSongs = async (prisma: PrismaClient, tracks: (Cancion & { arti
     });
     const artistsIds = artistsInDb.map((artist) => artist.id);
 
-    tracks.forEach(async (track) => {
+    await Promise.all(tracks.map(async (track) => {
         if (tracksIds.includes(track.id)) {
             return;
         }
-        await prisma.cancion.create({
-            data: {
-                id: track.id,
-                name: track.name,
-                albumImage: track.albumImage,
-                albumName: track.albumName,
-                albumId: track.albumId,
-                preview_url: track.preview_url,
-                duration: track.duration,
-                genres: track.genres,
-                artistsId: track.artists.map((artist) => artist.id),
-            },
-        });
-        track.artists.forEach(async (artist: any) => {
+        await Promise.all(track.artists.map(async (artist: any) => {
             if (artistsIds.includes(artist.id)) {
                 return;
             }
@@ -46,10 +33,40 @@ const addTracksAndSongs = async (prisma: PrismaClient, tracks: (Cancion & { arti
                     genres: artist.genres,
                 },
             });
+            artistsIds.push(artist.id);
+        }));
+        const newCancion = await prisma.cancion.create({
+            include: {
+                ArtistXCancion: {
+                    include: {
+                        cancion: true,
+                        artista: true,
+                    }
+                }
+            },
+            data: {
+                id: track.id,
+                name: track.name,
+                albumImage: track.albumImage,
+                albumName: track.albumName,
+                albumId: track.albumId,
+                preview_url: track.preview_url,
+                duration: track.duration,
+                genres: track.genres,
+                artistsId: track.artists.map((artist) => artist.id),
+                ArtistXCancion: {
+                    createMany: {
+                        data: track.artists.map((artist) => ({
+                            artistId: artist.id,
+                        })),
+                    },
+                },
+            }
         });
-    });
+        tracksIds.push(newCancion.id);
+    }));
 
-    artists.forEach(async (artist: Artista) => {
+    await Promise.all(artists.map(async (artist: Artista) => {
         if (artistsIds.includes(artist.id)) {
             return;
         }
@@ -61,7 +78,7 @@ const addTracksAndSongs = async (prisma: PrismaClient, tracks: (Cancion & { arti
                 image: artist.image,
             }
         });
-    });
+    }));
 };
 
 export const prismaGetUsers = async (prisma: PrismaClient) => {
@@ -99,6 +116,7 @@ export const prismaAddUser = async (prisma: PrismaClient, user: User & { tracks:
             artists: true,
         }
     });
+    console.log(newUser);
     return newUser;
 };
 
@@ -211,5 +229,31 @@ export const addInteraction = async (prisma: PrismaClient, userId: string, inter
         });
     } catch (error: any) {
         return resSend(500, error);
+    }
+};
+
+export const prismaGetUsersWithInfo = async (prisma: PrismaClient, user: User) => {
+    try {
+        const users = await prisma.user.findMany({
+            where: {
+                spotifyId: {
+                    equals: user.spotifyId,
+                }
+            },
+            include: {
+                tracks: {
+                    select: {
+                        cancion: true
+                    },
+                },
+                artists: true,
+            },
+        });
+        console.log(users);
+
+        return users;
+    } catch (error: any) {
+        console.log('error', error);
+        return [];
     }
 };

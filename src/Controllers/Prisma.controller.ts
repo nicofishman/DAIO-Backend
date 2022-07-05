@@ -4,7 +4,7 @@ import { resSend } from '../Utils/response';
 import { Request, Response } from 'express';
 import { getArtistById, getMultipleArtistsById, getSongById } from '../Services/Spotify.service';
 
-type userDB = User & { tracks: Track[], artists: Artist[] };
+export type userDB = User & { tracks: Track[], artists: Artist[] };
 
 const prisma = new PrismaClient();
 
@@ -38,6 +38,55 @@ export const addUser = async (req: Request, res: Response) => {
         });
 
     res.status(response.statusCode).send(response.body);
+};
+
+export const getUsersWithInfo = async (req: Request, res: Response) => {
+    const doReturn = req.cookies.doReturn;
+
+    const response: any = await service.prismaGetUsers(prisma)
+        .then((users) => {
+            return resSend(200, users);
+        })
+        .catch((error) => {
+            return resSend(500, error);
+        })
+        .finally(async () => {
+            await prisma.$disconnect();
+        });
+
+    if (response.statusCode !== 200) {
+        res.status(response.statusCode).send(response.body);
+    }
+
+    const users = /* req.body.length > 0 || */ Object.keys(req.body).length !== 0 ? req.body : response.body;
+
+    const usersWithInfo: any[] = await Promise.all(users.map(async (user: User) => {
+        try {
+            const responseWithInfo = await service.prismaGetUsersWithInfo(prisma, user);
+            console.log(responseWithInfo);
+            return resSend(200, responseWithInfo);
+        } catch (error: any) {
+            return resSend(500, error);
+        }
+    }));
+    let didFail = false;
+    usersWithInfo.forEach((userWithInfo) => {
+        console.log('userWithInfo', userWithInfo);
+        if (userWithInfo.statusCode !== 200) {
+            res.status(userWithInfo.statusCode).send(userWithInfo.body);
+            didFail = true;
+        }
+    });
+    if (didFail) return;
+    const newResponse = usersWithInfo.map((userWithInfo) => userWithInfo.body);
+
+    if (doReturn === 'true') {
+        res.cookie('doReturn', 'false');
+        return newResponse;
+    } else {
+        res.status(200).send(newResponse);
+        return null;
+    }
 };
 
 export const getUsersAndInfo = async (req: Request, res: Response) => {

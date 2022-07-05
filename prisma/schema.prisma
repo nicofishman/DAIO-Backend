@@ -13,7 +13,8 @@ model Artista {
     image  String
     genres String[]
 
-    Artist Artist[]
+    Artist         Artist[]
+    ArtistXCancion ArtistXCancion[]
     @@map("artistas")
 }
 
@@ -28,16 +29,28 @@ model Cancion {
     albumImage  String
     artistsId   String[]
 
-    Track Track[]
+    Track          Track[]
+    ArtistXCancion ArtistXCancion[]
     @@map("canciones")
+}
+
+model ArtistXCancion {
+    artistId  String
+    cancionId String
+
+    artista Artista @relation(fields: [artistId], references: [id], onDelete: Cascade)
+    cancion Cancion @relation(fields: [cancionId], references: [id], onDelete: Cascade)
+
+    @@id([artistId, cancionId])
+    @@map("artistas_canciones")
 }
 
 model Artist {
     artistId String
     fkUser   String
     orden    Int
-    user     User     @relation(fields: [fkUser], references: [spotifyId], onDelete: Cascade)
-    artista  Artista? @relation(fields: [artistId], references: [id])
+    user     User    @relation(fields: [fkUser], references: [spotifyId], onDelete: Cascade)
+    artista  Artista @relation(fields: [artistId], references: [id])
 
     @@id([artistId, fkUser, orden])
     @@map("artistxuser")
@@ -57,8 +70,8 @@ model Track {
     trackId String
     fkUser  String
     orden   Int
-    user    User     @relation(fields: [fkUser], references: [spotifyId], onDelete: Cascade)
-    track   Cancion? @relation(fields: [trackId], references: [id], onDelete: Cascade)
+    user    User    @relation(fields: [fkUser], references: [spotifyId], onDelete: Cascade)
+    cancion Cancion @relation(fields: [trackId], references: [id])
 
     @@id([trackId, fkUser, orden])
     @@map("trackxuser")

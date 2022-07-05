@@ -2,7 +2,7 @@ import { Router } from 'express';
 import {
     getUsers,
     addUser,
-    getUsersAndInfo,
+    getUsersWithInfo,
     notMatchedUsers,
     addInteraction
 } from '../Controllers/Prisma.controller';
@@ -11,7 +11,7 @@ const databaseRouter = Router();
 
 databaseRouter.get('/getusers', getUsers);
 databaseRouter.post('/adduser', addUser);
-databaseRouter.get('/getusersandinfo', getUsersAndInfo);
+databaseRouter.get('/getusersandinfo', getUsersWithInfo);
 databaseRouter.get('/notmatchedusers', notMatchedUsers);
 databaseRouter.post('/addinteraction', addInteraction);
 
