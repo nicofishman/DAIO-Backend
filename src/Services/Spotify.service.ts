@@ -94,21 +94,6 @@ export const getByAlbum = async (accessToken: string, query: any) => {
     return returnValue;
 };
 
-export const getBySong = async (accessToken: string, query: any) => {
-    spotifyApi.resetAccessToken();
-    spotifyApi.setAccessToken(accessToken);
-    let returnValue = {};
-    await spotifyApi
-        .searchTracks(query)
-        .then((data: any) => {
-            returnValue = resSend(200, data.body);
-        })
-        .catch((err: any) => {
-            returnValue = resSend(err.statusCode, err);
-        });
-    return returnValue;
-};
-
 export const getByArtistName = async (accessToken: string, query: string, res: Response) => {
     let returnValue = {};
     spotifyApi.resetAccessToken();
@@ -123,21 +108,6 @@ export const getByArtistName = async (accessToken: string, query: string, res: R
             returnValue = err;
         });
 
-    return returnValue;
-};
-
-export const getSongById = async (accessToken: string, query: string) => {
-    spotifyApi.resetAccessToken();
-    spotifyApi.setAccessToken(accessToken);
-    let returnValue = {};
-    await spotifyApi
-        .getTrack(query)
-        .then((data: any) => {
-            returnValue = resSend(200, data.body);
-        })
-        .catch((err: any) => {
-            returnValue = resSend(err.statusCode, err);
-        });
     return returnValue;
 };
 
@@ -198,6 +168,82 @@ export const userTopArtists = async (accessToken: string) => {
             returnValue = resSend(err.statusCode, { error: err });
         }
     );
+    return returnValue;
+};
+
+export const getSongById = async (accessToken: string, query: string) => {
+    spotifyApi.resetAccessToken();
+    spotifyApi.setAccessToken(accessToken);
+    let returnValue = {};
+    const searched: any[] = [];
+    await spotifyApi
+        .getTrack(query)
+        .then(async (data: any) => {
+            await Promise.all(data.body.tracks.items.map(async (track: any) => {
+                const songArtists: any = await getMultipleArtistsById(accessToken, track.artists.map((art: any) => art.id));
+                if (songArtists.statusCode !== 200) {
+                    returnValue = resSend(songArtists.statusCode, songArtists.body);
+                    return;
+                }
+
+                const genres: string[] = songArtists.body.artists.map((artist: any) => artist.genres).flat();
+
+                searched.push({
+                    id: track.id,
+                    name: track.name,
+                    img: track.album.images[0].url,
+                    artists: songArtists.body.artists,
+                    preview_url: track.preview_url,
+                    duration: track.duration_ms,
+                    albumId: track.album.id,
+                    albumName: track.album.name,
+                    albumImage: track.album.images[0].url,
+                    genres,
+                });
+            }));
+            returnValue = resSend(200, searched);
+        })
+        .catch((err: any) => {
+            returnValue = resSend(err.statusCode, err);
+        });
+    return returnValue;
+};
+
+export const getBySong = async (accessToken: string, query: any) => {
+    spotifyApi.resetAccessToken();
+    spotifyApi.setAccessToken(accessToken);
+    let returnValue = {};
+    const searched: any[] = [];
+    await spotifyApi
+        .searchTracks(query, { limit: 5 })
+        .then(async (data: any) => {
+            await Promise.all(data.body.tracks.items.map(async (track: any) => {
+                const songArtists: any = await getMultipleArtistsById(accessToken, track.artists.map((art: any) => art.id));
+                if (songArtists.statusCode !== 200) {
+                    returnValue = resSend(songArtists.statusCode, songArtists.body);
+                    return;
+                }
+
+                const genres: string[] = songArtists.body.artists.map((artist: any) => artist.genres).flat();
+
+                searched.push({
+                    id: track.id,
+                    name: track.name,
+                    img: track.album.images[0].url,
+                    artists: songArtists.body.artists,
+                    preview_url: track.preview_url,
+                    duration: track.duration_ms,
+                    albumId: track.album.id,
+                    albumName: track.album.name,
+                    albumImage: track.album.images[0].url,
+                    genres,
+                });
+            }));
+            returnValue = resSend(200, searched);
+        })
+        .catch((err: any) => {
+            returnValue = resSend(err.statusCode, err);
+        });
     return returnValue;
 };
 
