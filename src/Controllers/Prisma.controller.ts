@@ -78,7 +78,7 @@ export const getUsersWithInfo = async (req: Request, res: Response) => {
         }
     });
     if (didFail) return;
-    const newResponse = usersWithInfo.map((userWithInfo) => userWithInfo.body);
+    const newResponse = usersWithInfo.map((userWithInfo) => userWithInfo.body[0]);
 
     if (doReturn === 'true') {
         res.cookie('doReturn', 'false');

@@ -243,15 +243,59 @@ export const prismaGetUsersWithInfo = async (prisma: PrismaClient, user: User) =
             include: {
                 tracks: {
                     select: {
-                        cancion: true
+                        cancion: {
+                            include: {
+                                ArtistXCancion: {
+                                    select: {
+                                        artista: true,
+                                    }
+                                },
+                            }
+                        },
                     },
                 },
-                artists: true,
+                artists: {
+                    select: {
+                        artista: true,
+                    }
+                },
             },
         });
-        console.log(users);
 
-        return users;
+        const newUser = users.map((user) => {
+            return {
+                spotifyId: user.spotifyId,
+                username: user.username,
+                description: user.description,
+                avatarId: user.avatarId,
+                tracks: user.tracks.map((myTrack) => {
+                    const track = myTrack.cancion;
+                    return {
+                        id: track.id,
+                        name: track.name,
+                        preview_url: track.preview_url,
+                        duration: track.duration,
+                        genres: track.genres,
+                        albumId: track.albumId,
+                        albumImage: track.albumImage,
+                        albumName: track.albumName,
+                        artists: track.ArtistXCancion.map((artistXCancion) => {
+                            const artist = artistXCancion.artista;
+                            return {
+                                ...artist
+                            };
+                        })
+                    };
+                }),
+                artists: user.artists.map((myArtist) => {
+                    const artist = myArtist.artista;
+                    return {
+                        ...artist
+                    };
+                })
+            };
+        });
+        return newUser;
     } catch (error: any) {
         console.log('error', error);
         return [];
