@@ -188,15 +188,7 @@ export const getSongById = async (accessToken: string, query: string) => {
             const genres: string[] = songArtists.body.artists.map((artist: any) => artist.genres).flat();
 
             const song = {
-                id: track.id,
-                name: track.name,
-                img: track.album.images[0].url,
-                artists: songArtists.body.artists,
-                preview_url: track.preview_url,
-                duration: track.duration_ms,
-                albumId: track.album.id,
-                albumName: track.album.name,
-                albumImage: track.album.images[0].url,
+                ...track,
                 genres,
             };
             returnValue = resSend(200, song);
@@ -225,15 +217,7 @@ export const getBySong = async (accessToken: string, query: any) => {
                 const genres: string[] = songArtists.body.artists.map((artist: any) => artist.genres).flat();
 
                 searched.push({
-                    id: track.id,
-                    name: track.name,
-                    img: track.album.images[0].url,
-                    artists: songArtists.body.artists,
-                    preview_url: track.preview_url,
-                    duration: track.duration_ms,
-                    albumId: track.album.id,
-                    albumName: track.album.name,
-                    albumImage: track.album.images[0].url,
+                    ...track,
                     genres,
                 });
             }));
