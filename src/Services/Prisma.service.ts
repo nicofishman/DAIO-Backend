@@ -181,16 +181,16 @@ export const getNotMatchedUsers = async (prisma: PrismaClient, req: Request, res
                     }
                 ]
             },
-            include: {
-                tracks: true,
-                artists: true,
-            },
+            select: {
+                spotifyId: true,
+            }
         });
-        // console.log(users);
 
         req.body = users;
         req.cookies.doReturn = 'true';
         const usersWithInfo: any = await getUsersAndInfo(req, res);
+        console.log('res', usersWithInfo);
+
         return resSend(200, usersWithInfo);
     } catch (error: any) {
         return resSend(500, error);
@@ -268,7 +268,7 @@ export const prismaGetUsersWithInfo = async (prisma: PrismaClient, user: User) =
                 username: user.username,
                 description: user.description,
                 avatarId: user.avatarId,
-                tracks: user.tracks.map((myTrack) => {
+                canciones: user.tracks.map((myTrack) => {
                     const track = myTrack.cancion;
                     return {
                         id: track.id,
@@ -287,7 +287,7 @@ export const prismaGetUsersWithInfo = async (prisma: PrismaClient, user: User) =
                         })
                     };
                 }),
-                artists: user.artists.map((myArtist) => {
+                artistas: user.artists.map((myArtist) => {
                     const artist = myArtist.artista;
                     return {
                         ...artist

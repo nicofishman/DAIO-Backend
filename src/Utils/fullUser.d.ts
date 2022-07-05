@@ -17,12 +17,6 @@ export interface Artist {
     name: string
 }
 
-export interface Album {
-    id: string
-    name: string
-    img: string
-}
-
 export interface Cancione {
     id: string
     name: string
@@ -30,7 +24,9 @@ export interface Cancione {
     orden: number
     duration: number
     genres: string[]
-    album: Album
+    albumId: string
+    albumName: string
+    albumImage: string
     artists: Artist[]
 }
 

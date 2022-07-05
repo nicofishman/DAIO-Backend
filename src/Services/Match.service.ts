@@ -79,13 +79,13 @@ const checkSameAlbum = (user1: FullUser, user2: FullUser, user1Registro: Registr
     user1.canciones.forEach(x => {
         if (!(user1Registro.canciones.includes(x.id))) {
             // console.log(x.name, x.id, '->', x.album.id);
-            user1Albums.push({ id: x.id, albumId: x.album.id });
+            user1Albums.push({ id: x.id, albumId: x.albumId });
         }
     });
     user2.canciones.forEach(x => {
         if (!(user2Registro.canciones.includes(x.id))) {
             // console.log(x.name, x.id, '->', x.album.id);
-            user2Albums.push({ id: x.id, albumId: x.album.id });
+            user2Albums.push({ id: x.id, albumId: x.albumId });
         }
     });
 
