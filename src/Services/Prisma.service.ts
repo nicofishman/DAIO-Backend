@@ -98,26 +98,31 @@ export const prismaAddUser = async (prisma: PrismaClient, user: User & { tracks:
         artistId: artist.id,
         orden: index + 1,
     }));
-    const newUser = await prisma.user.create({
-        data: {
-            spotifyId: user.spotifyId,
-            username: user.username,
-            description: user.description,
-            avatarId: user.avatarId,
-            tracks: {
-                create: tracksData
+    try {
+        const newUser = await prisma.user.create({
+            data: {
+                spotifyId: user.spotifyId,
+                username: user.username,
+                description: user.description,
+                avatarId: user.avatarId,
+                tracks: {
+                    create: tracksData
+                },
+                artists: {
+                    create: artistsData
+                },
             },
-            artists: {
-                create: artistsData
-            },
-        },
-        include: {
-            tracks: true,
-            artists: true,
-        }
-    });
-    console.log(newUser);
-    return newUser;
+            include: {
+                tracks: true,
+                artists: true,
+            }
+        });
+        console.log(newUser);
+        return newUser;
+    } catch (error) {
+        console.log('error');
+        return { error };
+    }
 };
 
 export const getUserById = async (prisma: PrismaClient, userId: string) => {

@@ -21,7 +21,7 @@ model Artista {
 model Cancion {
     id          String   @id
     name        String
-    preview_url String
+    preview_url String?
     duration    Int
     genres      String[]
     albumId     String
