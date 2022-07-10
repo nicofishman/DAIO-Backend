@@ -10,6 +10,9 @@ export interface Artista {
     images: Image[]
     genres: string[]
     orden: number
+    external_urls: {
+        spotify: string
+    }
 }
 
 export interface Artist {
@@ -28,6 +31,9 @@ export interface Cancione {
     albumName: string
     albumImage: string
     artists: Artist[]
+    external_urls: {
+        spotify: string
+    }
 }
 
 export interface FullUser {

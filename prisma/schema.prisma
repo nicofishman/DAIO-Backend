@@ -8,38 +8,39 @@ datasource db {
 }
 
 model Artista {
-    id     String   @id
-    name   String
-    image  String
-    genres String[]
-
-    Artist         Artist[]
+    id             String           @id
+    name           String
+    image          String
+    genres         String[]
+    external_url   String?
     ArtistXCancion ArtistXCancion[]
+    Artist         Artist[]
+
     @@map("artistas")
 }
 
 model Cancion {
-    id          String   @id
-    name        String
-    preview_url String?
-    duration    Int
-    genres      String[]
-    albumId     String
-    albumName   String
-    albumImage  String
-    artistsId   String[]
-
-    Track          Track[]
+    id             String           @id
+    name           String
+    preview_url    String?
+    duration       Int
+    genres         String[]
+    albumId        String
+    albumName      String
+    albumImage     String
+    artistsId      String[]
+    external_url   String?
     ArtistXCancion ArtistXCancion[]
+    Track          Track[]
+
     @@map("canciones")
 }
 
 model ArtistXCancion {
     artistId  String
     cancionId String
-
-    artista Artista @relation(fields: [artistId], references: [id], onDelete: Cascade)
-    cancion Cancion @relation(fields: [cancionId], references: [id], onDelete: Cascade)
+    artista   Artista @relation(fields: [artistId], references: [id], onDelete: Cascade)
+    cancion   Cancion @relation(fields: [cancionId], references: [id], onDelete: Cascade)
 
     @@id([artistId, cancionId])
     @@map("artistas_canciones")
@@ -49,8 +50,8 @@ model Artist {
     artistId String
     fkUser   String
     orden    Int
-    user     User    @relation(fields: [fkUser], references: [spotifyId], onDelete: Cascade)
     artista  Artista @relation(fields: [artistId], references: [id])
+    user     User    @relation(fields: [fkUser], references: [spotifyId], onDelete: Cascade)
 
     @@id([artistId, fkUser, orden])
     @@map("artistxuser")

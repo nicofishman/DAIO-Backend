@@ -160,6 +160,7 @@ export const userTopArtists = async (accessToken: string) => {
                     name: artist.name,
                     image: artist.images[0].url,
                     genres: artist.genres,
+                    external_urls: artist.external_urls,
                 });
             });
             returnValue = resSend(200, topArtists);
@@ -253,6 +254,7 @@ export const userTopTracks = async (accessToken: string) => {
                     name: track.name,
                     img: track.album.images[0].url,
                     artists: songArtists.body.artists,
+                    external_urls: track.external_urls,
                     preview_url: track.preview_url,
                     duration: track.duration_ms,
                     albumId: track.album.id,

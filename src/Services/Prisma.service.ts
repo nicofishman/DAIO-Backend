@@ -3,7 +3,7 @@ import { Response, Request } from 'express';
 import { getUsersAndInfo } from '../Controllers/Prisma.controller';
 import { resSend } from '../Utils/response';
 
-const addTracksAndSongs = async (prisma: PrismaClient, tracks: (Cancion & { artists: Artista[] })[], artists: Artista[]) => {
+const addTracksAndSongs = async (prisma: PrismaClient, tracks: (Cancion & { artists: Artista[], external_urls: { spotify: string } })[], artists: (Artista & { external_urls: { spotify: string } })[]) => {
     const tracksDb = await prisma.cancion.findMany({
         select: {
             id: true,
@@ -31,6 +31,7 @@ const addTracksAndSongs = async (prisma: PrismaClient, tracks: (Cancion & { arti
                     name: artist.name,
                     image: artist.images[0].url,
                     genres: artist.genres,
+                    external_url: artist.external_urls?.spotify,
                 },
             });
             artistsIds.push(artist.id);
@@ -53,6 +54,7 @@ const addTracksAndSongs = async (prisma: PrismaClient, tracks: (Cancion & { arti
                 preview_url: track.preview_url,
                 duration: track.duration,
                 genres: track.genres,
+                external_url: track.external_urls?.spotify,
                 artistsId: track.artists.map((artist) => artist.id),
                 ArtistXCancion: {
                     createMany: {
@@ -66,19 +68,23 @@ const addTracksAndSongs = async (prisma: PrismaClient, tracks: (Cancion & { arti
         tracksIds.push(newCancion.id);
     }));
 
-    await Promise.all(artists.map(async (artist: Artista) => {
-        if (artistsIds.includes(artist.id)) {
-            return;
-        }
-        await prisma.artista.create({
-            data: {
-                id: artist.id,
-                name: artist.name,
-                genres: artist.genres,
-                image: artist.image,
+    await Promise.all(artists.map(
+        async (artist: (Artista & { external_urls: { spotify: string } })) => {
+            if (artistsIds.includes(artist.id)) {
+                return;
             }
-        });
-    }));
+            await prisma.artista.create({
+                data: {
+                    id: artist.id,
+                    name: artist.name,
+                    genres: artist.genres,
+                    image: artist.image,
+                    external_url: artist.external_urls.spotify,
+                }
+            });
+            artistsIds.push(artist.id);
+        }
+    ));
 };
 
 export const prismaGetUsers = async (prisma: PrismaClient) => {
@@ -86,7 +92,7 @@ export const prismaGetUsers = async (prisma: PrismaClient) => {
     return users;
 };
 
-export const prismaAddUser = async (prisma: PrismaClient, user: User & { tracks: (Cancion & { artists: Artista[] })[], artists: Artista[] }) => {
+export const prismaAddUser = async (prisma: PrismaClient, user: User & { tracks: (Cancion & { artists: Artista[], external_urls: { spotify: string } })[], artists: (Artista & { external_urls: { spotify: string } })[] }) => {
     await addTracksAndSongs(prisma, user.tracks, user.artists);
 
     const tracksData: Omit<Track, 'fkUser'>[] = user.tracks.map((track, index: number) => ({
