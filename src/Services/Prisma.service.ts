@@ -195,7 +195,7 @@ export const getNotMatchedUsers = async (prisma: PrismaClient, req: Request, res
             }
         });
 
-        const users = usersDB.filter((user) => (user.spotifyId !== userId && !matchedIds.includes(user.spotifyId))).map((user) => user.spotifyId);
+        const users = usersDB.filter((user) => (user.spotifyId !== userId && !matchedIds.includes(user.spotifyId)));
 
         req.body = users;
         req.cookies.doReturn = 'true';
