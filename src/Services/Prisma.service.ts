@@ -285,6 +285,7 @@ export const prismaGetUsersWithInfo = async (prisma: PrismaClient, user: User) =
                         id: track.id,
                         name: track.name,
                         preview_url: track.preview_url,
+                        external_url: track.external_url,
                         duration: track.duration,
                         genres: track.genres,
                         albumId: track.albumId,
