@@ -123,10 +123,8 @@ export const prismaAddUser = async (prisma: PrismaClient, user: User & { tracks:
                 artists: true,
             }
         });
-        console.log(newUser);
         return newUser;
     } catch (error) {
-        console.log('error');
         return { error };
     }
 };
@@ -177,30 +175,31 @@ export const getNotMatchedUsers = async (prisma: PrismaClient, req: Request, res
         }).then((interactions: interactions[]) => {
             return interactions.map((interaction) => interaction.interactedWithId);
         });
-        const users = await prisma.user.findMany({
+        const usersDB = await prisma.user.findMany({
             where: {
-                AND: [
-                    {
-                        spotifyId: {
-                            not: userId,
-                        }
-                    },
-                    {
-                        spotifyId: {
-                            notIn: matchedIds,
-                        }
-                    }
-                ]
+                // AND: [
+                //     {
+                //         NOT: {
+                //             spotifyId: userId
+                //         }
+                //     },
+                //     { // spotifyId not in matchedIds
+                //         spotifyId: {
+                //             notIn: matchedIds
+                //         }
+                //     }
+                // ]
             },
             select: {
                 spotifyId: true,
             }
         });
 
+        const users = usersDB.filter((user) => (user.spotifyId !== userId && !matchedIds.includes(user.spotifyId))).map((user) => user.spotifyId);
+
         req.body = users;
         req.cookies.doReturn = 'true';
         const usersWithInfo: any = await getUsersAndInfo(req, res);
-        console.log('res', usersWithInfo);
 
         return resSend(200, usersWithInfo);
     } catch (error: any) {
@@ -309,7 +308,6 @@ export const prismaGetUsersWithInfo = async (prisma: PrismaClient, user: User) =
         });
         return newUser;
     } catch (error: any) {
-        console.log('error', error);
         return [];
     }
 };

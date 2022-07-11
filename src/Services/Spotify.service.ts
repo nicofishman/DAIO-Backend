@@ -49,7 +49,6 @@ export const callback = async (res: Response, redirect: string, code: string) =>
 
             spotifyApi.setAccessToken(accessToken);
             spotifyApi.setRefreshToken(refreshToken);
-            console.log('Refreshed!');
             console.log('accessToken: ' + accessToken);
             // console.log('refreshToken: ' + refreshToken);
 
@@ -60,7 +59,6 @@ export const callback = async (res: Response, redirect: string, code: string) =>
                 const data = await spotifyApi.refreshAccessToken();
                 const accessToken = data.body.access_token;
 
-                console.log('The token has been refreshed!');
                 spotifyApi.setAccessToken(accessToken);
             }, (expiresIn / 2) * 1000);
         })

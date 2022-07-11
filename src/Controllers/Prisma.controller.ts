@@ -56,7 +56,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
         res.status(response.statusCode).send(response.body);
     }
 
-    const users = /* req.body.length > 0 || */ Object.keys(req.body).length !== 0 ? req.body : response.body;
+    const users = /* req.body.length > 0 || */ (Object.keys(req.body).length !== 0 || (Array.isArray(req.body) && req.body.length === 0)) ? req.body : response.body;
 
     const usersWithInfo: any[] = await Promise.all(users.map(async (user: User) => {
         try {

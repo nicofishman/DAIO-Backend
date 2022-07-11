@@ -58,11 +58,9 @@ export const getUsersFromUser = async (req: Request, res: Response) => {
     req.body = [myUser.body];
     req.cookies.doReturn = 'true';
     const myUserInfo: any = await getUsersAndInfo(req, res);
-    console.log('myUserInfo', myUserInfo);
     const miUsuario = myUserInfo[0];
 
     const notMatchedUsers: any = await prismaService.getNotMatchedUsers(prisma, req, res, userId);
-    console.log('notMatchedUsers', notMatchedUsers);
 
     if (notMatchedUsers.statusCode !== 200) {
         res.status(notMatchedUsers.statusCode).send(notMatchedUsers.body);
@@ -84,7 +82,6 @@ export const getUsersFromUser = async (req: Request, res: Response) => {
     const usersReturn: UserReturn[] = [];
     notMatchedUsers.body.forEach((user: FullUser) => {
         const compat: any = matchService.compare(user, miUsuario);
-        console.log('compat', compat);
         if (compat.statusCode !== 200) {
             res.status(compat.statusCode).send(compat.body);
             return;
