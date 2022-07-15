@@ -217,6 +217,7 @@ export const addInteraction = async (prisma: PrismaClient, userId: string, inter
                 madeById: userId,
                 interactedWithId,
                 decision,
+                isMatch: haveInteraction.length > 0,
                 timestamp: new Date(),
             }
         });
@@ -297,5 +298,38 @@ export const prismaGetUsersWithInfo = async (prisma: PrismaClient, user: User) =
         return newUser;
     } catch (error: any) {
         return [];
+    }
+};
+
+export const getInteractionsByUser = async (prisma: PrismaClient, userId: string) => {
+    try {
+        const interactions = await prisma.interactions.findMany({
+            where: {
+                madeById: userId,
+            }
+        });
+        return resSend(200, interactions);
+    } catch (error: any) {
+        return resSend(500, error);
+    }
+};
+
+export const getInteractionsByUserAndInteractedWith = async (prisma: PrismaClient, userId: string, interactedWithId: string) => {
+    try {
+        const interactions = await prisma.interactions.findMany({
+            where: {
+                AND: [
+                    {
+                        madeById: userId,
+                    },
+                    {
+                        interactedWithId,
+                    }
+                ]
+            }
+        });
+        return resSend(200, interactions);
+    } catch (error: any) {
+        return resSend(500, error);
     }
 };

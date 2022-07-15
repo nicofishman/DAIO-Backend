@@ -63,6 +63,7 @@ model interactions {
     decision         Boolean
     timestamp        DateTime @db.Timestamp(6)
     id               Int      @default(autoincrement())
+    isMatch          Boolean?
 
     @@id([madeById, interactedWithId, id])
 }

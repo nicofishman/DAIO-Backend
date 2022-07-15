@@ -86,6 +86,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
     }
 };
 
+// #region notMatchedUsers
 // export const getUsersAndInfo = async (req: Request, res: Response) => {
 //     const accessToken = req.get('accessToken');
 //     const doReturn = req.cookies.doReturn;
@@ -230,6 +231,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
 //         return null;
 //     }
 // };
+// #endregion
 
 export const notMatchedUsers = async (req: Request, res: Response) => {
     const userId = req.get('userId');
@@ -253,5 +255,15 @@ export const addInteraction = async (req: Request, res: Response) => {
         return;
     }
     const response: any = await service.addInteraction(prisma, userId, interactedWith, decision);
+    res.status(response.statusCode).send(response.body);
+};
+
+export const getInteractions = async (req: Request, res: Response) => {
+    const userId = req.get('userId');
+    if (!userId) {
+        res.status(401).send({ error: 'Missing userId' });
+        return;
+    }
+    const response: any = await service.getInteractionsByUser(prisma, userId);
     res.status(response.statusCode).send(response.body);
 };
