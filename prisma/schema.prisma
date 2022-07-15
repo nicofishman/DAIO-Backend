@@ -64,6 +64,8 @@ model interactions {
     timestamp        DateTime @db.Timestamp(6)
     id               Int      @default(autoincrement())
     isMatch          Boolean?
+    interactedWith   User     @relation(name: "interactedWith", fields: [interactedWithId], references: [spotifyId], onDelete: Cascade)
+    madeBy           User     @relation(name: "madeBy", fields: [madeById], references: [spotifyId], onDelete: Cascade)
 
     @@id([madeById, interactedWithId, id])
 }
@@ -87,6 +89,9 @@ model User {
     instagram   String?
     artists     Artist[]
     tracks      Track[]
+
+    interactedWith interactions[] @relation(name: "interactedWith")
+    madeBy         interactions[] @relation(name: "madeBy")
 
     @@map("users")
 }

@@ -306,6 +306,10 @@ export const getInteractionsByUser = async (prisma: PrismaClient, userId: string
         const interactions = await prisma.interactions.findMany({
             where: {
                 madeById: userId,
+            },
+            include: {
+                madeBy: true,
+                interactedWith: true,
             }
         });
         return resSend(200, interactions);
@@ -326,6 +330,10 @@ export const getInteractionsByUserAndInteractedWith = async (prisma: PrismaClien
                         interactedWithId,
                     }
                 ]
+            },
+            include: {
+                madeBy: true,
+                interactedWith: true,
             }
         });
         return resSend(200, interactions);
