@@ -111,6 +111,7 @@ export const prismaAddUser = async (prisma: PrismaClient, user: User & { tracks:
                 username: user.username,
                 description: user.description,
                 avatarId: user.avatarId,
+                instagram: user.instagram,
                 tracks: {
                     create: tracksData
                 },
@@ -176,20 +177,6 @@ export const getNotMatchedUsers = async (prisma: PrismaClient, req: Request, res
             return interactions.map((interaction) => interaction.interactedWithId);
         });
         const usersDB = await prisma.user.findMany({
-            where: {
-                // AND: [
-                //     {
-                //         NOT: {
-                //             spotifyId: userId
-                //         }
-                //     },
-                //     { // spotifyId not in matchedIds
-                //         spotifyId: {
-                //             notIn: matchedIds
-                //         }
-                //     }
-                // ]
-            },
             select: {
                 spotifyId: true,
             }
@@ -278,6 +265,7 @@ export const prismaGetUsersWithInfo = async (prisma: PrismaClient, user: User) =
                 username: user.username,
                 description: user.description,
                 avatarId: user.avatarId,
+                instagram: user.instagram,
                 canciones: user.tracks.map((myTrack) => {
                     const track = myTrack.cancion;
                     return {

@@ -83,6 +83,7 @@ model User {
     username    String
     description String
     avatarId    Decimal  @db.Decimal
+    instagram   String?
     artists     Artist[]
     tracks      Track[]
 
