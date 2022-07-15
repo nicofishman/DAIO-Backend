@@ -341,3 +341,37 @@ export const getInteractionsByUserAndInteractedWith = async (prisma: PrismaClien
         return resSend(500, error);
     }
 };
+
+export const getUsersAndInfoById = async (prisma: PrismaClient, userId: string) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                spotifyId: userId,
+            },
+            include: {
+                tracks: {
+                    select: {
+                        cancion: true
+                    },
+                    orderBy: {
+                        orden: 'asc',
+                    }
+                },
+                artists: {
+                    select: {
+                        artista: true,
+                    },
+                    orderBy: {
+                        orden: 'asc',
+                    }
+                },
+            },
+        });
+        if (!user) {
+            return resSend(404, { error: 'User not found' });
+        }
+        return resSend(200, user);
+    } catch (error: any) {
+        return resSend(500, error);
+    }
+};

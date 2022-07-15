@@ -233,6 +233,22 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
 // };
 // #endregion
 
+export const getUsersAndInfoById = async (req: Request, res: Response) => {
+    const response: any = await service
+        .getUsersAndInfoById(prisma, req.params.id)
+        .then((users) => {
+            return resSend(200, users);
+        })
+        .catch((error) => {
+            return resSend(500, error);
+        })
+        .finally(async () => {
+            await prisma.$disconnect();
+        });
+
+    res.status(response.statusCode).send(response.body.body);
+};
+
 export const notMatchedUsers = async (req: Request, res: Response) => {
     const userId = req.get('userId');
     if (!userId) {
