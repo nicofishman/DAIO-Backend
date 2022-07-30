@@ -12,11 +12,14 @@ import {
 const databaseRouter = Router();
 
 databaseRouter.get('/getusers', getUsers);
-databaseRouter.post('/adduser', addUser);
 databaseRouter.get('/getusersandinfo', getUsersAndInfo);
 databaseRouter.get('/getusersandinfo/:id', getUsersAndInfoById);
 databaseRouter.get('/notmatchedusers', notMatchedUsers);
-databaseRouter.post('/addinteraction', addInteraction);
 databaseRouter.get('/getinteractions', getInteractions);
+
+databaseRouter.post('/adduser', addUser);
+databaseRouter.post('/addinteraction', addInteraction);
+
+databaseRouter.put('/updateuser', addUser);
 
 export default databaseRouter;

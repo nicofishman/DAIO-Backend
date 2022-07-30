@@ -105,8 +105,39 @@ export const prismaAddUser = async (prisma: PrismaClient, user: User & { tracks:
         orden: index + 1,
     }));
     try {
-        const newUser = await prisma.user.create({
-            data: {
+        const newUser = await prisma.user.upsert({
+            where: {
+                spotifyId: user.spotifyId
+            },
+            update: {
+                username: user.username,
+                description: user.description,
+                avatarId: user.avatarId,
+                instagram: user.instagram,
+                tracks: {
+                    updateMany: tracksData.map((track) => ({
+                        where: {
+                            fkUser: user.spotifyId,
+                            orden: track.orden,
+                        },
+                        data: {
+                            trackId: track.trackId,
+                        },
+                    })),
+                },
+                artists: {
+                    updateMany: artistsData.map((artist) => ({
+                        where: {
+                            fkUser: user.spotifyId,
+                            orden: artist.orden,
+                        },
+                        data: {
+                            artistId: artist.artistId,
+                        },
+                    })),
+                }
+            },
+            create: {
                 spotifyId: user.spotifyId,
                 username: user.username,
                 description: user.description,
@@ -125,8 +156,10 @@ export const prismaAddUser = async (prisma: PrismaClient, user: User & { tracks:
             }
         });
         return newUser;
-    } catch (error) {
-        return { error };
+    } catch (error: any) {
+        console.log(error);
+
+        throw new Error(error);
     }
 };
 
