@@ -384,7 +384,15 @@ export const getUsersAndInfoById = async (prisma: PrismaClient, userId: string) 
             include: {
                 tracks: {
                     select: {
-                        cancion: true
+                        cancion: {
+                            include: {
+                                ArtistXCancion: {
+                                    select: {
+                                        artista: true,
+                                    }
+                                },
+                            }
+                        },
                     },
                     orderBy: {
                         orden: 'asc',
@@ -409,8 +417,15 @@ export const getUsersAndInfoById = async (prisma: PrismaClient, userId: string) 
             };
         });
         const newSongs = user.tracks.map((track) => {
+            const { ArtistXCancion, ...newTrack } = track.cancion;
             return {
-                ...track.cancion,
+                ...newTrack,
+                artists: track.cancion.ArtistXCancion.map((artistXCancion) => {
+                    const artist = artistXCancion.artista;
+                    return {
+                        ...artist,
+                    };
+                }),
             };
         });
         user.tracks = newSongs as any;
