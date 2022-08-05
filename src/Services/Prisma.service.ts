@@ -403,6 +403,18 @@ export const getUsersAndInfoById = async (prisma: PrismaClient, userId: string) 
         if (!user) {
             return resSend(404, { error: 'User not found' });
         }
+        const newArtists: Artista[] = user.artists.map((artist) => {
+            return {
+                ...artist.artista,
+            };
+        });
+        const newSongs = user.tracks.map((track) => {
+            return {
+                ...track.cancion,
+            };
+        });
+        user.tracks = newSongs as any;
+        user.artists = newArtists as any;
         return resSend(200, user);
     } catch (error: any) {
         return resSend(500, error);
