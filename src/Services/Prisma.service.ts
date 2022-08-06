@@ -343,7 +343,10 @@ export const getInteractionsByUser = async (prisma: PrismaClient, userId: string
             include: {
                 madeBy: true,
                 interactedWith: true,
-            }
+            },
+            orderBy: {
+                timestamp: 'desc',
+            },
         });
         return resSend(200, interactions);
     } catch (error: any) {
