@@ -255,6 +255,8 @@ export const addInteraction = async (prisma: PrismaClient, userId: string, inter
             },
             select: {
                 isMatch: true,
+                madeById: true,
+                interactedWithId: true,
             }
         });
         if (interaction.isMatch) {
@@ -264,12 +266,12 @@ export const addInteraction = async (prisma: PrismaClient, userId: string, inter
                     AND: [
                         {
                             interactedWithId: {
-                                equals: interactedWithId
+                                equals: userId
                             }
                         },
                         {
                             madeById: {
-                                equals: userId
+                                equals: interactedWithId
                             }
                         }
                     ],
