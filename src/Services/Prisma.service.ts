@@ -252,8 +252,33 @@ export const addInteraction = async (prisma: PrismaClient, userId: string, inter
                 decision,
                 isMatch: haveInteraction.length > 0,
                 timestamp: new Date(),
+            },
+            select: {
+                isMatch: true,
             }
         });
+        if (interaction.isMatch) {
+            // update interaction in the other user to isMatch true
+            await prisma.interactions.updateMany({
+                where: {
+                    AND: [
+                        {
+                            interactedWithId: {
+                                equals: interactedWithId
+                            }
+                        },
+                        {
+                            madeById: {
+                                equals: userId
+                            }
+                        }
+                    ],
+                },
+                data: {
+                    isMatch: true
+                }
+            });
+        }
         return resSend(201, {
             ...interaction,
             match: haveInteraction.length > 0,
