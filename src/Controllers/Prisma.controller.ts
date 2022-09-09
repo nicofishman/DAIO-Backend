@@ -86,6 +86,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
     }
 };
 
+// <editor-fold desc="notMatchedUsers">
 // #region notMatchedUsers
 // export const getUsersAndInfo = async (req: Request, res: Response) => {
 //     const accessToken = req.get('accessToken');
@@ -232,6 +233,7 @@ export const getUsersAndInfo = async (req: Request, res: Response) => {
 //     }
 // };
 // #endregion
+// </editor-fold>
 
 export const getUsersAndInfoById = async (req: Request, res: Response) => {
     const response: any = await service
