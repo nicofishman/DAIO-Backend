@@ -62,12 +62,11 @@ model interactions {
     interactedWithId String
     decision         Boolean
     timestamp        DateTime @db.Timestamp(6)
-    id               Int      @default(autoincrement())
+    id               Int      @default(autoincrement()) @id
     isMatch          Boolean?
     interactedWith   User     @relation(name: "interactedWith", fields: [interactedWithId], references: [spotifyId], onDelete: Cascade)
     madeBy           User     @relation(name: "madeBy", fields: [madeById], references: [spotifyId], onDelete: Cascade)
 
-    @@id([madeById, interactedWithId, id])
 }
 
 model Track {

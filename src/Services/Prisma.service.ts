@@ -465,3 +465,16 @@ export const getUsersAndInfoById = async (prisma: PrismaClient, userId: string) 
         return resSend(500, error);
     }
 };
+
+export const deleteUser = async (prisma: PrismaClient, userId: string) => {
+    try {
+        await prisma.user.delete({
+            where: {
+                spotifyId: userId,
+            }
+        });
+        return resSend(200, { message: 'User deleted' });
+    } catch (error: any) {
+        return resSend(500, error);
+    }
+};

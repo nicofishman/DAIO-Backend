@@ -285,3 +285,14 @@ export const getInteractions = async (req: Request, res: Response) => {
     const response: any = await service.getInteractionsByUser(prisma, userId);
     res.status(response.statusCode).send(response.body);
 };
+
+export const deleteUser = async (req: Request, res: Response) => {
+    const { spotifyid } = req.params;
+
+    if (!spotifyid) {
+        res.status(401).send({ error: 'Missing userId' });
+        return;
+    }
+    const response: any = await service.deleteUser(prisma, spotifyid);
+    res.status(response.statusCode).send(response.body);
+};

@@ -6,7 +6,8 @@ import {
     notMatchedUsers,
     addInteraction,
     getInteractions,
-    getUsersAndInfoById
+    getUsersAndInfoById,
+    deleteUser
 } from '../Controllers/Prisma.controller';
 
 const databaseRouter = Router();
@@ -21,5 +22,7 @@ databaseRouter.post('/adduser', addUser);
 databaseRouter.post('/addinteraction', addInteraction);
 
 databaseRouter.put('/updateuser', addUser);
+
+databaseRouter.delete('/deleteuser/:spotifyid', deleteUser);
 
 export default databaseRouter;
